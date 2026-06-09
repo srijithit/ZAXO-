@@ -1,0 +1,99 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  phone        String?
+  password     String
+  role         String        @default("USER") // USER, ADMIN
+  createdAt    DateTime      @default(now())
+  orders       Order[]
+  customOrders CustomOrder[]
+}
+
+model Product {
+  id            String           @id @default(uuid())
+  name          String
+  slug          String           @unique
+  description   String
+  category      String           // V-Neck Scrubs, Round Neck Scrubs, Overlap Neck Scrubs, Mandarin Collar Scrubs, Full Sleeve Scrubs, Basic Pants, Cargo Pants, Jogger Pants, Flare Pants, Doctor Coats, Surgical Gowns
+  gender        String           // Men, Women, Unisex
+  basePrice     Float
+  discountPrice Float?
+  fabric        String           @default("72% Polyester, 21% Rayon, 7% Spandex")
+  images        String           // JSON array of image URLs
+  featured      Boolean          @default(false)
+  variants      ProductVariant[]
+  reviews       Review[]
+}
+
+model ProductVariant {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String   // XS, S, M, L, XL, XXL
+  color     String   // Navy Blue, Royal Blue, Teal, Hunter Green, Wine, Charcoal, Black, Ceil Blue, Dusty Rose
+  stock     Int      @default(100)
+  sku       String   @unique
+}
+
+model Order {
+  id              String   @id @default(uuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  totalAmount     Float
+  status          String   @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  paymentStatus   String   @default("UNPAID") // UNPAID, PAID, FAILED
+  shippingAddress String   // JSON address string
+  items           String   // JSON string of ordered items
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CustomOrder {
+  id           String   @id @default(uuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+  hospitalName String
+  productType  String
+  color        String
+  size         String?  // Standard size if chosen
+  quantity     Int
+  customName   String?  // Text for embroidery
+  logoUrl      String?  // Path to uploaded logo
+  measurements String?  // JSON string: { chest, waist, hip, height, inseam }
+  status       String   @default("PENDING") // PENDING, REVIEWED, QUOTED, APPROVED, REJECTED
+  priceQuote   Float?
+  createdAt    DateTime @default(now())
+}
+
+model BulkLead {
+  id           String   @id @default(uuid())
+  hospitalName String
+  contactName  String
+  email        String
+  phone        String
+  quantity     Int
+  productType  String
+  notes        String?
+  logoUrl      String?
+  status       String   @default("NEW") // NEW, CONTACTED, QUOTED, CLOSED_WON, CLOSED_LOST
+  createdAt    DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  author    String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #16a34a;
+  --color-primary-hover: #15803d;
+  --color-primary-dark: #14532d;
+  --color-secondary: #1e293b;
+  --color-secondary-dark: #0f172a;
+  --color-accent: #d97706;
+  --color-accent-hover: #f59e0b;
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Custom premium styling classes */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.shadow-premium {
+  box-shadow: 0 10px 30px -10px rgba(15, 118, 110, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.shadow-premium-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shadow-premium-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -15px rgba(15, 118, 110, 0.15), 0 1px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom color swatches mapping (supports hyphenated and non-hyphenated slugs) */
+.bg-navy-blue, .bg-navyblue { background-color: #1b2d42; }
+.bg-royal-blue, .bg-royalblue { background-color: #2b579a; }
+.bg-teal { background-color: #0f766e; }
+.bg-hunter-green, .bg-huntergreen { background-color: #1e3f20; }
+.bg-wine { background-color: #611a24; }
+.bg-charcoal { background-color: #4a4a4a; }
+.bg-black { background-color: #111111; }
+.bg-ceil-blue, .bg-ceilblue { background-color: #8da4c4; }
+.bg-dusty-rose, .bg-dustyrose { background-color: #c48d9f; }
+.bg-white-swatch { background-color: #f8fafc; border: 1px solid #cbd5e1; }
+
+/* Print Styles to force single page and clean invoice presentation */
+@media print {
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Reset layout margins for print */
+  @page {
+    size: auto;
+    margin: 1cm;
+  }
+}
