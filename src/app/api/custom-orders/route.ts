@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Fetch custom orders (for admin dashboard)
+// Fetch custom orders (supports filtering by userId for client history, or all for admin)
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    const where: any = {};
+    if (userId) {
+      where.userId = userId;
+    }
+
     const customOrders = await prisma.customOrder.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
