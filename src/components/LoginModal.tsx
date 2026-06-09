@@ -123,10 +123,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   };
 
   // Pre-fill helper credentials to make testing extremely easy for the user
-  const handlePrefill = (role: 'admin' | 'user') => {
+  const handlePrefill = (role: 'admin' | 'staff' | 'user') => {
     if (role === 'admin') {
       setEmail('admin@zaxo.com');
       setPassword('admin');
+    } else if (role === 'staff') {
+      setEmail('staff@zaxo.com');
+      setPassword('staff');
     } else {
       setEmail('arjun@hospital.com');
       setPassword('user');
@@ -301,18 +304,25 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               {isLoginView && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
                   <p className="text-[11px] font-semibold text-slate-400 uppercase text-center mb-2">Demo Accounts (Quick Select)</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => handlePrefill('user')}
-                      className="px-2 py-1.5 border border-slate-200 hover:border-primary text-slate-600 hover:text-primary rounded text-xs transition-colors"
+                      className="px-2 py-1.5 border border-slate-200 hover:border-primary text-slate-605 hover:text-primary rounded text-[10px] sm:text-xs transition-colors font-semibold"
                     >
                       Doctor Login
                     </button>
                     <button
                       type="button"
+                      onClick={() => handlePrefill('staff')}
+                      className="px-2 py-1.5 border border-slate-200 hover:border-primary text-slate-605 hover:text-primary rounded text-[10px] sm:text-xs transition-colors font-semibold"
+                    >
+                      Staff Login
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => handlePrefill('admin')}
-                      className="px-2 py-1.5 border border-slate-200 hover:border-primary text-slate-600 hover:text-primary rounded text-xs transition-colors"
+                      className="px-2 py-1.5 border border-slate-200 hover:border-primary text-slate-605 hover:text-primary rounded text-[10px] sm:text-xs transition-colors font-semibold"
                     >
                       Admin Login
                     </button>

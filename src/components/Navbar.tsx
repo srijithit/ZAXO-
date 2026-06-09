@@ -62,7 +62,7 @@ export default function Navbar() {
             </Link>
             {(user?.role === 'ADMIN' || user?.role === 'STAFF') && (
               <Link href="/admin" className="text-amber-600 hover:text-amber-700 transition-colors border-b-2 border-transparent flex items-center gap-1 font-semibold">
-                <Shield className="w-4 h-4" /> Admin Panel
+                <Shield className="w-4 h-4" /> {user?.role === 'ADMIN' ? 'Admin Panel' : 'Staff Panel'}
               </Link>
             )}
           </nav>
@@ -105,7 +105,7 @@ export default function Navbar() {
                         onClick={() => setIsProfileDropdownOpen(false)}
                         className="flex items-center px-4 py-2 text-sm text-amber-700 hover:bg-amber-50 font-semibold border-b border-slate-50"
                       >
-                        <Shield className="w-4 h-4 mr-2" /> Admin Dashboard
+                        <Shield className="w-4 h-4 mr-2" /> {user.role === 'ADMIN' ? 'Admin Dashboard' : 'Staff Dashboard'}
                       </Link>
                     )}
                     <Link
@@ -186,7 +186,7 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="block px-3 py-2 rounded-lg text-base font-bold text-amber-700 bg-amber-50"
             >
-              Admin Dashboard
+              {user?.role === 'ADMIN' ? 'Admin Dashboard' : 'Staff Dashboard'}
             </Link>
           )}
         </div>

@@ -30,6 +30,17 @@ async function main() {
     }
   });
 
+  console.log('Seeding staff user...');
+  await prisma.user.create({
+    data: {
+      name: 'ZAXO Staff',
+      email: 'staff@zaxo.com',
+      password: 'staff', // Simple password for demo
+      role: 'STAFF',
+      phone: '9876543212'
+    }
+  });
+
   await prisma.user.create({
     data: {
       name: 'Dr. Arjun Mehta',
