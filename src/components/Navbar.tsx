@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
-import { ShoppingBag, User, LogOut, Shield, Briefcase, RefreshCw, Menu, X, PlusSquare } from 'lucide-react';
+import { ShoppingBag, User, LogOut, Shield, Briefcase, RefreshCw, Menu, X, PlusSquare, Settings } from 'lucide-react';
 import LoginModal from './LoginModal';
 
 export default function Navbar() {
@@ -114,6 +114,13 @@ export default function Navbar() {
                       className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary font-semibold border-b border-slate-50"
                     >
                       <Briefcase className="w-4 h-4 mr-2 text-primary" /> Order History
+                    </Link>
+                    <Link
+                      href="/order-history?tab=settings"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                      className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary font-semibold border-b border-slate-50"
+                    >
+                      <Settings className="w-4 h-4 mr-2 text-primary" /> Account Settings
                     </Link>
                     <button
                       onClick={() => {

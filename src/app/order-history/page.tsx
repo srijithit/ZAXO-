@@ -198,6 +198,16 @@ export default function OrderHistoryPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab === 'settings' || tab === 'custom' || tab === 'retail') {
+        setActiveTab(tab as any);
+      }
+    }
+  }, []);
+
   const toggleExpand = (orderId: string) => {
     setExpandedOrder(prev => (prev === orderId ? null : orderId));
   };
