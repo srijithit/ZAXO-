@@ -23,7 +23,8 @@ import {
   XCircle,
   Info,
   ThumbsUp,
-  AlertCircle
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 
 export default function OrderHistoryPage() {
@@ -40,7 +41,15 @@ export default function OrderHistoryPage() {
   const [expandedCustomOrder, setExpandedCustomOrder] = useState<string | null>(null);
   
   // Active Tab state
-  const [activeTab, setActiveTab] = useState<'retail' | 'custom'>('retail');
+  const [activeTab, setActiveTab] = useState<'retail' | 'custom' | 'settings'>('retail');
+
+  // Change Password Form State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
   
   // Print State
   const [selectedPrintOrder, setSelectedPrintOrder] = useState<any>(null);
@@ -130,6 +139,55 @@ export default function OrderHistoryPage() {
       fetchCustomOrders();
     } catch (err) {
       alert('Error approving custom uniform quote');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (!user) return;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('All fields are required');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 4) {
+      setPasswordError('Password must be at least 4 characters long');
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          currentPassword,
+          newPassword
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to change password');
+      }
+
+      setPasswordSuccess('Password changed successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      setPasswordError(err.message || 'Error occurred while changing password');
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -238,6 +296,16 @@ export default function OrderHistoryPage() {
             }`}
           >
             <Sparkles className="w-4 h-4" /> B2B Custom Quotes ({customOrders.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`pb-3 font-bold text-sm transition-all flex items-center gap-2 border-b-2 ${
+              activeTab === 'settings' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            <Settings className="w-4 h-4" /> Account Settings
           </button>
         </div>
 
@@ -431,7 +499,7 @@ export default function OrderHistoryPage() {
               })}
             </div>
           )
-        ) : (
+        ) : activeTab === 'custom' ? (
           /* B2B Custom Quotes List */
           loadingCustom ? (
             <div className="text-center py-20 text-slate-500">
@@ -686,6 +754,78 @@ export default function OrderHistoryPage() {
               })}
             </div>
           )
+        ) : (
+          /* Account Settings (Change Password) Form */
+          <div className="max-w-md mx-auto bg-white border border-slate-100 p-6 md:p-8 rounded-3xl shadow-premium space-y-6">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-1.5">
+                <Lock className="w-5 h-5 text-primary" /> Change Account Password
+              </h3>
+              <p className="text-xs text-slate-400 font-semibold font-sans">
+                Update your security password for ZAXO storefront access.
+              </p>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-450 uppercase tracking-wider mb-1">Current Password *</label>
+                <input
+                  type="password"
+                  required
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-1 focus:ring-primary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-450 uppercase tracking-wider mb-1">New Password *</label>
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-1 focus:ring-primary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-450 uppercase tracking-wider mb-1">Confirm New Password *</label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-1 focus:ring-primary focus:outline-none"
+                />
+              </div>
+
+              {passwordError && (
+                <div className="p-3 bg-rose-50 text-rose-700 font-bold border border-rose-100 rounded-xl text-xs flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{passwordError}</span>
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="p-3 bg-emerald-50 text-emerald-700 font-bold border border-emerald-100 rounded-xl text-xs flex items-center gap-1.5">
+                  <Check className="w-4 h-4 shrink-0" />
+                  <span>{passwordSuccess}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={passwordLoading}
+                className="w-full py-2.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-md transition-all text-xs disabled:opacity-50 animate-in fade-in"
+              >
+                {passwordLoading ? 'Updating Password...' : 'Update Password'}
+              </button>
+            </form>
+          </div>
         )}
 
       </div>

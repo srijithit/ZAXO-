@@ -24,7 +24,9 @@ import {
   Trash2, 
   Edit, 
   FileCheck,
-  Lock
+  Lock,
+  UserCheck,
+  Settings
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -44,7 +46,7 @@ export default function AdminPage() {
     }
   }, [selectedPrintOrder]);
 
-  // Dashboard Tabs: 'overview', 'orders', 'leads', 'customs', 'products'
+  // Dashboard Tabs: 'overview', 'orders', 'leads', 'customs', 'products', 'users'
   const [activeTab, setActiveTab] = useState('overview');
   
   // Data States
@@ -52,7 +54,9 @@ export default function AdminPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [customs, setCustoms] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   // Active pricing quote state
   const [quoteInput, setQuoteInput] = useState<Record<string, string>>({});
@@ -113,9 +117,53 @@ export default function AdminPage() {
     }
   };
 
+  const fetchUsers = async () => {
+    if (!user || user.role !== 'ADMIN') return;
+    try {
+      setLoadingUsers(true);
+      const res = await fetch(`/api/users?requesterId=${user.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUsersList(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleUpdateUserRole = async (targetUserId: string, newRole: string) => {
+    if (!user || user.role !== 'ADMIN') return;
+    if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+    try {
+      const res = await fetch('/api/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requesterId: user.id,
+          targetUserId,
+          newRole
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update role');
+      alert('User role updated successfully');
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.message || 'Error updating user role');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (user && user.role === 'ADMIN') {
+      fetchUsers();
+    }
+  }, [user]);
 
   // Update Retail Order Status
   const handleUpdateOrderStatus = async (orderId: string, status: string) => {
@@ -376,7 +424,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || (user.role !== 'ADMIN' && user.role !== 'STAFF')) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 py-12">
         <div className="max-w-md w-full text-center space-y-6 bg-white border border-slate-100 p-8 rounded-2xl shadow-premium animate-in fade-in zoom-in-95 duration-200">
@@ -386,7 +434,7 @@ export default function AdminPage() {
           <div className="space-y-2">
             <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Access Denied</h1>
             <p className="text-sm text-slate-500 leading-relaxed">
-              This workspace is restricted to ZAXO administrators. Please sign in with an administrator account to view order logs and manage inventory.
+              This workspace is restricted to ZAXO administrators and staff. Please sign in with an authorized account to view order logs and manage inventory.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center">
@@ -493,6 +541,18 @@ export default function AdminPage() {
         >
           <Award className="w-4 h-4" /> Manage Products ({products.length})
         </button>
+        {user && user.role === 'ADMIN' && (
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-3 text-xs font-bold text-center border-b-2 flex items-center gap-1.5 transition-all shrink-0 ${
+              activeTab === 'users' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <UserCheck className="w-4 h-4 text-indigo-650" /> Users & Staff ({usersList.length})
+          </button>
+        )}
       </div>
 
       {/* Tab Contents: Overview */}
@@ -1228,6 +1288,97 @@ export default function AdminPage() {
             </div>
           )}
 
+        </div>
+      )}
+
+      {activeTab === 'users' && user?.role === 'ADMIN' && (
+        <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-premium space-y-4 animate-in fade-in duration-200">
+          <div className="flex justify-between items-center border-b pb-2">
+            <h2 className="font-extrabold text-slate-800 text-base">Users & Staff Access Management</h2>
+            <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full">
+              Only Admins Can Grant Access
+            </span>
+          </div>
+
+          {loadingUsers ? (
+            <div className="text-center py-12 text-slate-500">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+              <p className="text-xs font-semibold">Loading users list...</p>
+            </div>
+          ) : usersList.length === 0 ? (
+            <p className="text-sm text-slate-400 py-8 text-center">No users registered in database.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-700 uppercase font-bold text-[9px]">
+                    <th className="p-3 border-b">User Info</th>
+                    <th className="p-3 border-b">Contact Info</th>
+                    <th className="p-3 border-b">Account Created</th>
+                    <th className="p-3 border-b">Current Role</th>
+                    <th className="p-3 border-b text-right">Modify Access / Promotion</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y text-slate-600 font-medium">
+                  {usersList.map((usr) => (
+                    <tr key={usr.id} className="hover:bg-slate-50/50">
+                      <td className="p-3">
+                        <p className="font-bold text-slate-850">{usr.name}</p>
+                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">{usr.id}</p>
+                      </td>
+                      <td className="p-3 space-y-0.5">
+                        <p className="font-semibold text-slate-700">{usr.email}</p>
+                        {usr.phone && <p className="text-[10px] text-slate-400">{usr.phone}</p>}
+                      </td>
+                      <td className="p-3 text-[10px] text-slate-400">
+                        {new Date(usr.createdAt).toLocaleDateString('en-IN')}
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                          usr.role === 'ADMIN' ? 'bg-amber-100 text-amber-800' :
+                          usr.role === 'STAFF' ? 'bg-indigo-100 text-indigo-800' :
+                          'bg-slate-100 text-slate-750'
+                        }`}>
+                          {usr.role}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
+                          <button
+                            onClick={() => handleUpdateUserRole(usr.id, 'USER')}
+                            disabled={usr.id === user?.id}
+                            className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${
+                              usr.role === 'USER' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            } disabled:opacity-50`}
+                          >
+                            User
+                          </button>
+                          <button
+                            onClick={() => handleUpdateUserRole(usr.id, 'STAFF')}
+                            disabled={usr.id === user?.id}
+                            className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${
+                              usr.role === 'STAFF' ? 'bg-white text-indigo-750 shadow-sm' : 'text-slate-400 hover:text-indigo-650'
+                            } disabled:opacity-50`}
+                          >
+                            Staff
+                          </button>
+                          <button
+                            onClick={() => handleUpdateUserRole(usr.id, 'ADMIN')}
+                            disabled={usr.id === user?.id}
+                            className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${
+                              usr.role === 'ADMIN' ? 'bg-white text-amber-700 shadow-sm' : 'text-slate-400 hover:text-amber-650'
+                            } disabled:opacity-50`}
+                          >
+                            Admin
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

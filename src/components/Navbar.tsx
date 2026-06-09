@@ -60,7 +60,7 @@ export default function Navbar() {
             <Link href="/hospital-orders" className={activeLink('/hospital-orders')}>
               Bulk orders
             </Link>
-            {user?.role === 'ADMIN' && (
+            {(user?.role === 'ADMIN' || user?.role === 'STAFF') && (
               <Link href="/admin" className="text-amber-600 hover:text-amber-700 transition-colors border-b-2 border-transparent flex items-center gap-1 font-semibold">
                 <Shield className="w-4 h-4" /> Admin Panel
               </Link>
@@ -99,7 +99,7 @@ export default function Navbar() {
                       <p className="text-xs text-slate-400">Signed in as</p>
                       <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
                     </div>
-                    {user.role === 'ADMIN' && (
+                    {(user.role === 'ADMIN' || user.role === 'STAFF') && (
                       <Link
                         href="/admin"
                         onClick={() => setIsProfileDropdownOpen(false)}
@@ -173,7 +173,7 @@ export default function Navbar() {
           >
             Bulk Orders
           </Link>
-          {user?.role === 'ADMIN' && (
+          {(user?.role === 'ADMIN' || user?.role === 'STAFF') && (
             <Link
               href="/admin"
               onClick={() => setIsMobileMenuOpen(false)}
