@@ -856,7 +856,7 @@ export default function OrderHistoryPage() {
               <p className="text-[10px] text-slate-500 max-w-[200px]">
                 446/1, Ist Floor, RvR Store, Athipalayam Road, Ganapathy, Coimbatore - 641006, Tamil Nadu
               </p>
-              <p className="text-[10px] text-slate-500">Phone: +91 98940 12345</p>
+              <p className="text-[10px] text-slate-500">Phone: +91 97914 71277</p>
             </div>
             <div className="text-right">
               <h1 className="text-xl font-bold uppercase tracking-wider text-slate-800">Tax Invoice</h1>

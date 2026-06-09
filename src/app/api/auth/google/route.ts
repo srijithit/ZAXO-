@@ -16,13 +16,17 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
+      // If this is the first user in the database, make them an ADMIN
+      const usersCount = await prisma.user.count();
+      const role = usersCount === 0 ? 'ADMIN' : 'USER';
+
       // Create a new user with Google details
       user = await prisma.user.create({
         data: {
           name,
           email,
           password: 'google_oauth_placeholder', // Google users do not use passwords
-          role: 'USER'
+          role
         }
       });
     }

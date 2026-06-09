@@ -208,7 +208,7 @@ export default function CartPage() {
         const messageText = `Hi ZAXO Clothing, I've placed order #${orderObj.id.substring(0, 8)} on your site.\n\n*Order Details:*\n${itemsText}\n\n*Shipping Address:*\nName: ${addressName}\nAddress: ${streetAddress}, ${city} - ${postalCode}\nPhone: ${addressPhone}\n\n*Grand Total:* ₹${cartTotal}\n\nPlease share the payment instructions to confirm this order. Thank you!`;
         
         const encodedMessage = encodeURIComponent(messageText);
-        const whatsappUrl = `https://wa.me/919894012345?text=${encodedMessage}`;
+        const whatsappUrl = `https://wa.me/919791471277?text=${encodedMessage}`;
 
         window.open(whatsappUrl, '_blank');
         setLoading(false);

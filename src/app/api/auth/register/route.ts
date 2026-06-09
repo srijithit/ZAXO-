@@ -18,6 +18,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     }
 
+    // If this is the first user in the database, make them an ADMIN
+    const usersCount = await prisma.user.count();
+    const role = usersCount === 0 ? 'ADMIN' : 'USER';
+
     // Create user in DB
     const user = await prisma.user.create({
       data: {
@@ -25,7 +29,7 @@ export async function POST(request: Request) {
         email,
         phone,
         password,
-        role: 'USER' // Default role
+        role
       }
     });
 
