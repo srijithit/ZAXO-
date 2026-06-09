@@ -117,35 +117,57 @@ export default function ProductDetailClient({ product, variants, reviews }: Prod
       {/* Product Detail Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         
-        {/* Left Column: Image Gallery Placeholder */}
+        {/* Left Column: Image Gallery/Preview */}
         <div className="space-y-4">
-          <div className="aspect-square bg-white border border-slate-100 rounded-3xl flex items-center justify-center p-8 relative overflow-hidden shadow-premium">
-            <span className="absolute top-4 left-4 bg-slate-900/5 text-slate-700 text-xs font-bold px-3 py-1 rounded-full">
+          <div className="aspect-square bg-white border border-slate-100 rounded-3xl flex items-center justify-center relative overflow-hidden shadow-premium">
+            <span className="absolute top-4 left-4 z-10 bg-slate-900/90 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">
               Category: {product.category}
             </span>
             {product.discountPrice && (
-              <span className="absolute top-4 right-4 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+              <span className="absolute top-4 right-4 z-10 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                 15% OFF
               </span>
             )}
             
-            {/* Styled Visual Canvas */}
-            <div className="flex flex-col items-center">
-              <div 
-                className="w-40 h-40 rounded-full flex items-center justify-center border-4 border-slate-100 mb-4 transition-all"
-                style={{ 
-                  backgroundColor: selectedColor ? getColorHex(selectedColor) : '#16a34a',
-                  borderColor: selectedColor ? `${getColorHex(selectedColor)}30` : '#16a34a20'
-                }}
-              >
-                <ShoppingBag className="w-16 h-16 text-white/90" />
-              </div>
-              <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">Premium Fabric Drape Preview</p>
-              <div className="flex gap-2 mt-4 text-xs font-bold text-slate-700">
-                <span className="bg-slate-100 px-3 py-1 rounded-full">4-Way Stretch</span>
-                <span className="bg-slate-100 px-3 py-1 rounded-full">Wrinkle Free</span>
-              </div>
-            </div>
+            {(() => {
+              let parsedImages: string[] = [];
+              try {
+                parsedImages = JSON.parse(product.images);
+              } catch (e) {
+                parsedImages = product.images ? [product.images] : [];
+              }
+              const imageUrl = parsedImages[0];
+              
+              if (imageUrl && imageUrl !== '/images/scrubs-placeholder.jpg') {
+                return (
+                  <img 
+                    src={imageUrl} 
+                    alt={product.name} 
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                );
+              }
+              
+              return (
+                /* Styled Visual Canvas Fallback */
+                <div className="flex flex-col items-center p-8">
+                  <div 
+                    className="w-40 h-40 rounded-full flex items-center justify-center border-4 border-slate-100 mb-4 transition-all"
+                    style={{ 
+                      backgroundColor: selectedColor ? getColorHex(selectedColor) : '#16a34a',
+                      borderColor: selectedColor ? `${getColorHex(selectedColor)}30` : '#16a34a20'
+                    }}
+                  >
+                    <ShoppingBag className="w-16 h-16 text-white/90" />
+                  </div>
+                  <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">Premium Fabric Drape Preview</p>
+                  <div className="flex gap-2 mt-4 text-xs font-bold text-slate-700">
+                    <span className="bg-slate-100 px-3 py-1 rounded-full">4-Way Stretch</span>
+                    <span className="bg-slate-100 px-3 py-1 rounded-full">Wrinkle Free</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
           
           <div className="grid grid-cols-2 gap-4">

@@ -199,17 +199,25 @@ export default async function HomePage() {
             return (
               <div key={product.id} className="group bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-premium shadow-premium-hover flex flex-col justify-between">
                 
-                {/* Product Image placeholder graphic */}
-                <div className="aspect-[4/3] bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden border-b border-slate-50">
-                  <HeartPulse className="w-12 h-12 text-slate-200 group-hover:scale-110 group-hover:text-primary/10 transition-all duration-300" />
+                {/* Product Image preview */}
+                <div className="aspect-[4/3] bg-slate-50 flex items-center justify-center relative overflow-hidden border-b border-slate-50">
+                  {parsedImages && parsedImages[0] && parsedImages[0] !== '/images/scrubs-placeholder.jpg' ? (
+                    <img 
+                      src={parsedImages[0]} 
+                      alt={product.name} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <HeartPulse className="w-12 h-12 text-slate-200 group-hover:scale-110 group-hover:text-primary/10 transition-all duration-300" />
+                  )}
                   
                   {hasDiscount && (
-                    <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                       Sale
                     </span>
                   )}
 
-                  <span className="absolute top-3 right-3 bg-slate-900/5 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                  <span className="absolute top-3 right-3 z-10 bg-slate-900/80 text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
                     {product.gender}
                   </span>
                 </div>
