@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     // Check if there is an uploaded file
     const file = formData.get('image') as File | null;
     if (file && file.size > 0) {
-      const blob = await put(file.name, file, { access: 'public' });
+      const blob = await put(file.name, file, { access: 'public', addRandomSuffix: true });
       imageUrl = blob.url;
     } else {
       // Check if an external image url was passed
@@ -173,7 +173,7 @@ export async function PUT(request: Request) {
     // Check if there is an uploaded file
     const file = formData.get('image') as File | null;
     if (file && file.size > 0) {
-      const blob = await put(file.name, file, { access: 'public' });
+      const blob = await put(file.name, file, { access: 'public', addRandomSuffix: true });
       updateData.images = JSON.stringify([blob.url]);
     } else {
       // Check if imageUrl was passed
