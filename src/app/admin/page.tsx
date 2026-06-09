@@ -655,7 +655,8 @@ export default function AdminPage() {
                     <th className="p-3 border-b">Recipient Details</th>
                     <th className="p-3 border-b">Total Items</th>
                     <th className="p-3 border-b">Amount</th>
-                    <th className="p-3 border-b">Payment</th>
+                    <th className="p-3 border-b">Payment Status</th>
+                    <th className="p-3 border-b">Method</th>
                     <th className="p-3 border-b">Status</th>
                     <th className="p-3 border-b">Actions</th>
                   </tr>
@@ -712,6 +713,17 @@ export default function AdminPage() {
                         </td>
                         <td className="p-3">
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            order.paymentMethod === 'WhatsApp' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            order.paymentMethod === 'Razorpay' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                            order.paymentMethod === 'COD' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                            order.paymentMethod === 'BankTransfer' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                            'bg-slate-100 text-slate-755'
+                          }`}>
+                            {order.paymentMethod || 'UPI'}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                             order.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-800' :
                             order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
                             order.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700'
@@ -735,6 +747,19 @@ export default function AdminPage() {
                             >
                               Deliver
                             </button>
+                          )}
+                          {order.paymentMethod === 'WhatsApp' && (
+                            <a
+                              href={`https://wa.me/${shipping.phone ? (shipping.phone.replace(/\D/g, '').length === 10 ? '91' + shipping.phone.replace(/\D/g, '') : shipping.phone.replace(/\D/g, '')) : ''}?text=${encodeURIComponent(`Hello ${shipping.name}, this is ZAXO Clothing regarding your retail order #${order.id.substring(0, 8)}. We are reaching out to verify payment.`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1 border border-emerald-200 hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 rounded no-print transition-colors flex items-center justify-center"
+                              title="Chat on WhatsApp"
+                            >
+                              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-2.09c1.61.956 3.197 1.467 4.86 1.468 5.462 0 9.907-4.444 9.91-9.913.002-2.65-1.02-5.14-2.877-6.998C16.63 4.607 14.14 3.582 11.998 3.582c-5.466 0-9.91 4.445-9.913 9.916-.002 1.764.462 3.486 1.348 5.023l-.974 3.56 3.655-.959zm12.39-7.228c-.303-.152-1.793-.884-2.071-.985-.278-.102-.48-.153-.681.152-.2.304-.778.985-.955 1.187-.176.203-.353.228-.656.076-.303-.152-1.278-.47-2.435-1.502-.9-.803-1.507-1.794-1.684-2.098-.177-.303-.019-.467.132-.618.136-.135.303-.353.455-.53.15-.176.2-.303.3-.505.1-.202.05-.378-.025-.53-.075-.152-.682-1.644-.934-2.253-.246-.597-.496-.516-.681-.526-.176-.009-.379-.01-.582-.01-.202 0-.53.076-.808.379-.278.303-1.062 1.037-1.062 2.529 0 1.492 1.087 2.934 1.239 3.136.152.203 2.138 3.264 5.18 4.58.723.313 1.288.5 1.727.64.726.23 1.388.197 1.91.12.583-.087 1.794-.733 2.047-1.44.253-.708.253-1.314.177-1.44-.076-.126-.278-.203-.581-.355z" />
+                              </svg>
+                            </a>
                           )}
                           <button
                             onClick={() => setSelectedPrintOrder(order)}
@@ -1471,7 +1496,7 @@ export default function AdminPage() {
           <div className="grid grid-cols-2 gap-4 items-start border-t pt-4">
             <div className="text-[10px] text-slate-500 space-y-1">
               <p><strong>Payment Status:</strong> <span className="text-emerald-700 font-bold uppercase">{selectedPrintOrder.paymentStatus}</span></p>
-              <p><strong>Payment Method:</strong> UPI or Card</p>
+              <p><strong>Payment Method:</strong> {selectedPrintOrder.paymentMethod || 'UPI'}</p>
               <p className="pt-2 font-medium">Terms & Conditions:</p>
               <p>1. Goods once sold are not returnable unless defective.</p>
               <p>2. Customized embroidery products cannot be exchanged.</p>

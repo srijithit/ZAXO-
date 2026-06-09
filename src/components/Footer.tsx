@@ -60,9 +60,6 @@ export default function Footer() {
               <li>
                 <Link href="/customize" className="hover:text-teal-400 transition-colors">Logo & Name Embroidery</Link>
               </li>
-              <li>
-                <Link href="/admin" className="hover:text-teal-400 transition-colors text-amber-400">Staff Portal / Admin Login</Link>
-              </li>
             </ul>
           </div>
 

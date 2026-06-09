@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, totalAmount, shippingAddress, items, paymentStatus } = body;
+    const { userId, totalAmount, shippingAddress, items, paymentStatus, paymentMethod } = body;
 
     if (!totalAmount || !shippingAddress || !items || !Array.isArray(items)) {
       return NextResponse.json({ error: 'Missing required order details' }, { status: 400 });
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
         shippingAddress: typeof shippingAddress === 'string' ? shippingAddress : JSON.stringify(shippingAddress),
         items: JSON.stringify(items),
         paymentStatus: paymentStatus || 'PAID', // Defaults to PAID for demo/simulated checkouts
+        paymentMethod: paymentMethod || 'UPI',
         status: 'PENDING'
       }
     });

@@ -435,9 +435,15 @@ export default function OrderHistoryPage() {
                             <p><span className="text-slate-400 font-medium">Phone:</span> <strong className="text-slate-700">{shipping.phone}</strong></p>
                             <p><span className="text-slate-400 font-medium">Email:</span> <strong className="text-slate-700">{shipping.email || user.email}</strong></p>
                             <p className="pt-1">
-                              <span className="text-slate-400 font-medium">Payment Mode:</span>{' '}
+                              <span className="text-slate-400 font-medium">Payment Status:</span>{' '}
                               <span className={`font-bold uppercase ${order.paymentStatus === 'PAID' ? 'text-emerald-700' : 'text-amber-700'}`}>
                                 {order.paymentStatus}
+                              </span>
+                            </p>
+                            <p>
+                              <span className="text-slate-400 font-medium">Payment Method:</span>{' '}
+                              <span className="font-bold text-slate-700 uppercase">
+                                {order.paymentMethod || 'UPI'}
                               </span>
                             </p>
                           </div>
@@ -922,7 +928,7 @@ export default function OrderHistoryPage() {
           <div className="grid grid-cols-2 gap-4 items-start border-t pt-4">
             <div className="text-[10px] text-slate-500 space-y-1">
               <p><strong>Payment Status:</strong> <span className="text-emerald-700 font-bold uppercase">{selectedPrintOrder.paymentStatus}</span></p>
-              <p><strong>Payment Method:</strong> UPI or Card</p>
+              <p><strong>Payment Method:</strong> {selectedPrintOrder.paymentMethod || 'UPI'}</p>
               <p className="pt-2 font-medium">Terms & Conditions:</p>
               <p>1. Goods once sold are not returnable unless defective.</p>
               <p>2. Customized embroidery products cannot be exchanged.</p>
