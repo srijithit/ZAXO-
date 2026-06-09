@@ -335,6 +335,10 @@ export default function AdminPage() {
 
   // Delete Product
   const handleDeleteProduct = async (id: string) => {
+    if (user?.role !== 'ADMIN') {
+      alert('Access Denied: Only administrators can delete products.');
+      return;
+    }
     if (!confirm('Are you sure you want to permanently delete this product? All corresponding size/color variants and reviews will also be removed.')) return;
     try {
       const res = await fetch(`/api/products?id=${id}`, {
@@ -350,6 +354,10 @@ export default function AdminPage() {
 
   // Delete Order Log
   const handleDeleteOrder = async (orderId: string) => {
+    if (user?.role !== 'ADMIN') {
+      alert('Access Denied: Only administrators can delete order logs.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this order log? This action is permanent.')) return;
     try {
       const res = await fetch(`/api/orders?orderId=${orderId}`, {
@@ -365,6 +373,10 @@ export default function AdminPage() {
 
   // Delete B2B Sales Lead
   const handleDeleteLead = async (leadId: string) => {
+    if (user?.role !== 'ADMIN') {
+      alert('Access Denied: Only administrators can delete sales leads.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this sales lead? This action is permanent.')) return;
     try {
       const res = await fetch(`/api/bulk-leads?leadId=${leadId}`, {
@@ -380,6 +392,10 @@ export default function AdminPage() {
 
   // Delete B2B Bespoke Custom Quote Request
   const handleDeleteQuote = async (customOrderId: string) => {
+    if (user?.role !== 'ADMIN') {
+      alert('Access Denied: Only administrators can delete custom quote requests.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this custom quote request? This action is permanent.')) return;
     try {
       const res = await fetch(`/api/custom-orders?customOrderId=${customOrderId}`, {
@@ -768,13 +784,15 @@ export default function AdminPage() {
                           >
                             <Printer className="w-3.5 h-3.5" />
                           </button>
-                          <button
-                            onClick={() => handleDeleteOrder(order.id)}
-                            className="p-1 border hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 no-print transition-all"
-                            title="Delete Order Log"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {user?.role === 'ADMIN' && (
+                            <button
+                              onClick={() => handleDeleteOrder(order.id)}
+                              className="p-1 border hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 no-print transition-all"
+                              title="Delete Order Log"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -875,13 +893,15 @@ export default function AdminPage() {
                             <Download className="w-3.5 h-3.5" />
                           </a>
                         )}
-                        <button
-                          onClick={() => handleDeleteLead(lead.id)}
-                          className="p-1 border hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-all"
-                          title="Delete Lead Log"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {user?.role === 'ADMIN' && (
+                          <button
+                            onClick={() => handleDeleteLead(lead.id)}
+                            className="p-1 border hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-all"
+                            title="Delete Lead Log"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -1017,13 +1037,15 @@ export default function AdminPage() {
                               <Download className="w-3.5 h-3.5" />
                             </a>
                           )}
-                          <button
-                            onClick={() => handleDeleteQuote(cust.id)}
-                            className="p-1 border hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-all"
-                            title="Delete Quote Log"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {user?.role === 'ADMIN' && (
+                            <button
+                              onClick={() => handleDeleteQuote(cust.id)}
+                              className="p-1 border hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-all"
+                              title="Delete Quote Log"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -1104,13 +1126,15 @@ export default function AdminPage() {
                           >
                             <Edit className="w-3.5 h-3.5" />
                           </button>
-                          <button
-                            onClick={() => handleDeleteProduct(prod.id)}
-                            className="p-1.5 border border-slate-200 hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-all"
-                            title="Delete Product"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {user?.role === 'ADMIN' && (
+                            <button
+                              onClick={() => handleDeleteProduct(prod.id)}
+                              className="p-1.5 border border-slate-200 hover:border-rose-350 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-all"
+                              title="Delete Product"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );
