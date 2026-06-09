@@ -616,10 +616,31 @@ export default function AdminPage() {
                           <p className="text-[10px] text-slate-400">{shipping.phone} | {shipping.city}</p>
                         </td>
                         <td className="p-3">
-                          <p className="font-semibold">{items.length} items</p>
-                          <p className="text-[9px] text-slate-400 truncate max-w-[150px]">
-                            {items.map((i: any) => `${i.product.name} (x${i.quantity})`).join(', ')}
-                          </p>
+                          <p className="font-semibold text-slate-800">{items.length} items</p>
+                          <div className="space-y-2 mt-1 max-w-[240px]">
+                            {items.map((item: any, idx: number) => (
+                              <div key={idx} className="text-[10px] text-slate-500 border-b border-slate-100 pb-1.5 last:border-0 last:pb-0">
+                                <p className="font-bold text-slate-700">{item.product.name} (x{item.quantity})</p>
+                                <p className="text-[9px] text-slate-400">Color: {item.variant.color} | Size: {item.variant.size}</p>
+                                {item.customization && (
+                                  <div className="mt-1 bg-slate-50 p-1.5 rounded space-y-0.5 border border-slate-100">
+                                    {item.customization.nameText && (
+                                      <p>• Name: <span className="font-bold text-slate-700">"{item.customization.nameText}"</span> ({item.customization.nameFont}, {item.customization.nameColor})</p>
+                                    )}
+                                    {item.customization.logoFile && (
+                                      <div className="flex items-center gap-1.5 mt-1">
+                                        <span>• Logo:</span>
+                                        <a href={item.customization.logoFile} target="_blank" rel="noreferrer" className="inline-block w-6 h-6 rounded border border-slate-200 bg-white overflow-hidden hover:opacity-80 transition-opacity">
+                                          <img src={item.customization.logoFile} alt="Custom Logo" className="w-full h-full object-contain" />
+                                        </a>
+                                        <a href={item.customization.logoFile} download="logo" target="_blank" className="text-[9px] text-primary hover:underline font-bold">Download</a>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </td>
                         <td className="p-3 font-bold text-slate-800">₹{order.totalAmount}</td>
                         <td className="p-3">

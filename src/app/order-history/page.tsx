@@ -403,7 +403,15 @@ export default function OrderHistoryPage() {
                                         {item.customization.nameText && (
                                           <p>• Name: <strong className="text-slate-700">"{item.customization.nameText}"</strong> ({item.customization.nameFont} Font, {item.customization.nameColor} Placement)</p>
                                         )}
-                                        {item.customization.logoFile && <p>• Brand Logo Embroidery included</p>}
+                                        {item.customization.logoFile && (
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <span>• Brand Logo:</span>
+                                            <a href={item.customization.logoFile} target="_blank" rel="noreferrer" className="block w-6 h-6 rounded border border-slate-200 bg-white overflow-hidden hover:opacity-80 transition-opacity">
+                                              <img src={item.customization.logoFile} alt="Logo" className="w-full h-full object-contain" />
+                                            </a>
+                                            <span className="text-[9px] text-slate-400 font-semibold">(Click logo to view)</span>
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -749,7 +757,12 @@ export default function OrderHistoryPage() {
                             {item.customization.nameText && (
                               <p>• Name: "{item.customization.nameText}" ({item.customization.nameFont} Font, {item.customization.nameColor} Thread)</p>
                             )}
-                            {item.customization.logoFile && <p>• Brand Logo Embroidery included</p>}
+                            {item.customization.logoFile && (
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span>• Logo:</span>
+                                <img src={item.customization.logoFile} alt="Logo" className="w-5 h-5 object-contain border border-slate-200 bg-white rounded" />
+                              </div>
+                            )}
                           </div>
                         )}
                       </td>
