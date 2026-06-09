@@ -70,6 +70,7 @@ export default function AdminPage() {
   const [formDescription, setFormDescription] = useState('');
   const [formImage, setFormImage] = useState('');
   const [formFeatured, setFormFeatured] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const categories = [
     'V-Neck Scrubs',
@@ -204,6 +205,7 @@ export default function AdminPage() {
     setFormDescription('');
     setFormImage('');
     setFormFeatured(false);
+    setSelectedFile(null);
     setShowProductModal(true);
   };
 
@@ -217,6 +219,7 @@ export default function AdminPage() {
     setFormDiscountPrice(prod.discountPrice ? String(prod.discountPrice) : '');
     setFormFabric(prod.fabric);
     setFormDescription(prod.description);
+    setSelectedFile(null);
     
     // Parse images array
     try {
@@ -234,26 +237,34 @@ export default function AdminPage() {
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (selectedFile) {
+      setIsUploadingImage(true);
+    }
 
-    const payload = {
-      id: editingProduct?.id,
-      name: formName,
-      description: formDescription,
-      category: formCategory,
-      gender: formGender,
-      basePrice: parseFloat(formBasePrice),
-      discountPrice: formDiscountPrice ? parseFloat(formDiscountPrice) : null,
-      fabric: formFabric,
-      images: formImage || '/images/scrubs-placeholder.jpg',
-      featured: formFeatured
-    };
+    const formData = new FormData();
+    if (editingProduct?.id) {
+      formData.append('id', editingProduct.id);
+    }
+    formData.append('name', formName);
+    formData.append('description', formDescription);
+    formData.append('category', formCategory);
+    formData.append('gender', formGender);
+    formData.append('basePrice', formBasePrice);
+    formData.append('discountPrice', formDiscountPrice || '');
+    formData.append('fabric', formFabric);
+    formData.append('featured', String(formFeatured));
+
+    if (selectedFile) {
+      formData.append('image', selectedFile);
+    } else {
+      formData.append('imageUrl', formImage);
+    }
 
     try {
       const method = editingProduct ? 'PUT' : 'POST';
       const res = await fetch('/api/products', {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: formData
       });
       const data = await res.json();
 
@@ -264,11 +275,13 @@ export default function AdminPage() {
       alert(editingProduct ? 'Product updated successfully!' : 'Product created successfully with automatic size & color variants!');
       setShowProductModal(false);
       setEditingProduct(null);
+      setSelectedFile(null);
       fetchData();
     } catch (err: any) {
       alert(err.message || 'Error saving product');
     } finally {
       setLoading(false);
+      setIsUploadingImage(false);
     }
   };
 
@@ -334,28 +347,12 @@ export default function AdminPage() {
 
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // Handle local image file upload using Vercel Blob API
-  const handleLocalImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local image file selection
+  const handleLocalImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setIsUploadingImage(true);
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        if (!res.ok) throw new Error('Upload failed');
-        const data = await res.json();
-        setFormImage(data.url);
-      } catch (error) {
-        console.error('Image upload error:', error);
-        alert('Failed to upload image to cloud storage. Please try again.');
-        setFormImage('');
-      } finally {
-        setIsUploadingImage(false);
-      }
+      setSelectedFile(file);
+      setFormImage(URL.createObjectURL(file));
     }
   };
 

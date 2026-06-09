@@ -46,13 +46,22 @@ export async function GET(request: Request) {
   }
 }
 
+import { put } from '@vercel/blob';
+
 // Create new product (Admin)
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, description, category, gender, basePrice, discountPrice, fabric, images, featured } = body;
+    const formData = await request.formData();
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const category = formData.get('category') as string;
+    const gender = formData.get('gender') as string;
+    const basePriceStr = formData.get('basePrice') as string;
+    const discountPriceStr = formData.get('discountPrice') as string;
+    const fabric = formData.get('fabric') as string;
+    const featuredStr = formData.get('featured') as string;
 
-    if (!name || !description || !category || !gender || !basePrice) {
+    if (!name || !description || !category || !gender || !basePriceStr) {
       return NextResponse.json({ error: 'Missing required product parameters' }, { status: 400 });
     }
 
@@ -63,7 +72,20 @@ export async function POST(request: Request) {
       slug = `${slug}-${Date.now().toString().slice(-4)}`;
     }
 
-    const imageArray = Array.isArray(images) ? images : [images || '/images/scrubs-placeholder.jpg'];
+    let imageUrl = '/images/scrubs-placeholder.jpg';
+    
+    // Check if there is an uploaded file
+    const file = formData.get('image') as File | null;
+    if (file && file.size > 0) {
+      const blob = await put(file.name, file, { access: 'public' });
+      imageUrl = blob.url;
+    } else {
+      // Check if an external image url was passed
+      const extUrl = formData.get('imageUrl') as string;
+      if (extUrl) imageUrl = extUrl;
+    }
+
+    const imageArray = [imageUrl];
 
     // Insert Product
     const newProduct = await prisma.product.create({
@@ -73,11 +95,11 @@ export async function POST(request: Request) {
         description,
         category,
         gender,
-        basePrice: parseFloat(basePrice),
-        discountPrice: discountPrice ? parseFloat(discountPrice) : null,
+        basePrice: parseFloat(basePriceStr),
+        discountPrice: discountPriceStr ? parseFloat(discountPriceStr) : null,
         fabric: fabric || '72% Polyester, 21% Rayon, 7% Spandex',
         images: JSON.stringify(imageArray),
-        featured: featured === true
+        featured: featuredStr === 'true'
       }
     });
 
@@ -117,8 +139,16 @@ export async function POST(request: Request) {
 // Edit existing product (Admin)
 export async function PUT(request: Request) {
   try {
-    const body = await request.json();
-    const { id, name, description, category, gender, basePrice, discountPrice, fabric, images, featured } = body;
+    const formData = await request.formData();
+    const id = formData.get('id') as string;
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const category = formData.get('category') as string;
+    const gender = formData.get('gender') as string;
+    const basePriceStr = formData.get('basePrice') as string;
+    const discountPriceStr = formData.get('discountPrice') as string;
+    const fabric = formData.get('fabric') as string;
+    const featuredStr = formData.get('featured') as string;
 
     if (!id) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -129,14 +159,29 @@ export async function PUT(request: Request) {
     if (description) updateData.description = description;
     if (category) updateData.category = category;
     if (gender) updateData.gender = gender;
-    if (basePrice !== undefined) updateData.basePrice = parseFloat(basePrice);
-    if (discountPrice !== undefined) updateData.discountPrice = discountPrice ? parseFloat(discountPrice) : null;
-    if (fabric) updateData.fabric = fabric;
-    if (images) {
-      const imageArray = Array.isArray(images) ? images : [images];
-      updateData.images = JSON.stringify(imageArray);
+    if (basePriceStr !== undefined && basePriceStr !== null) {
+      updateData.basePrice = parseFloat(basePriceStr);
     }
-    if (featured !== undefined) updateData.featured = featured === true;
+    if (discountPriceStr !== undefined && discountPriceStr !== null) {
+      updateData.discountPrice = discountPriceStr ? parseFloat(discountPriceStr) : null;
+    }
+    if (fabric) updateData.fabric = fabric;
+    if (featuredStr !== undefined && featuredStr !== null) {
+      updateData.featured = featuredStr === 'true';
+    }
+
+    // Check if there is an uploaded file
+    const file = formData.get('image') as File | null;
+    if (file && file.size > 0) {
+      const blob = await put(file.name, file, { access: 'public' });
+      updateData.images = JSON.stringify([blob.url]);
+    } else {
+      // Check if imageUrl was passed
+      const extUrl = formData.get('imageUrl') as string;
+      if (extUrl) {
+        updateData.images = JSON.stringify([extUrl]);
+      }
+    }
 
     const updatedProduct = await prisma.product.update({
       where: { id },
