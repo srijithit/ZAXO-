@@ -10,6 +10,17 @@ export async function GET(request: Request) {
     const where: any = {};
     if (userId) {
       where.userId = userId;
+
+      // Auto-mark as viewed when the customer requests their list
+      await prisma.customOrder.updateMany({
+        where: {
+          userId,
+          viewedByCustomer: false
+        },
+        data: {
+          viewedByCustomer: true
+        }
+      });
     }
 
     const customOrders = await prisma.customOrder.findMany({
@@ -87,6 +98,11 @@ export async function PUT(request: Request) {
     const updateData: any = {};
     if (status) updateData.status = status;
     if (priceQuote !== undefined) updateData.priceQuote = parseFloat(priceQuote);
+    
+    // Reset viewedByCustomer to false when the quote is updated by admin
+    if (status === 'QUOTED' || priceQuote !== undefined) {
+      updateData.viewedByCustomer = false;
+    }
 
     const updatedCustomOrder = await prisma.customOrder.update({
       where: { id: customOrderId },

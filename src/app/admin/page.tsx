@@ -857,6 +857,15 @@ export default function AdminPage() {
                           }`}>
                             {cust.status}
                           </span>
+                          {cust.status === 'QUOTED' && (
+                            <div className="text-[10px] mt-1.5 font-bold">
+                              {cust.viewedByCustomer ? (
+                                <span className="text-emerald-600 flex items-center gap-0.5">✓ Seen by customer</span>
+                              ) : (
+                                <span className="text-slate-400 flex items-center gap-0.5">Unread by customer</span>
+                              )}
+                            </div>
+                          )}
                         </td>
                         
                         {/* Quote Input */}
