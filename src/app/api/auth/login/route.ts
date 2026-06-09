@@ -30,7 +30,10 @@ export async function POST(request: Request) {
     });
 
   } catch (error: any) {
-    console.error('Login error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Login error:', error?.message || error);
+    return NextResponse.json(
+      { error: error?.message || 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
