@@ -82,3 +82,52 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+// Delete user account (restricted to admin, cannot delete self)
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const requesterId = searchParams.get('requesterId');
+    const targetUserId = searchParams.get('targetUserId');
+
+    if (!requesterId || !targetUserId) {
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+    }
+
+    if (requesterId === targetUserId) {
+      return NextResponse.json({ error: 'Forbidden. You cannot delete your own account.' }, { status: 400 });
+    }
+
+    const requester = await prisma.user.findUnique({
+      where: { id: requesterId }
+    });
+
+    if (!requester || requester.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized. Only admins can delete user accounts.' }, { status: 403 });
+    }
+
+    // Set null on relations first to prevent any potential database constraints
+    await prisma.order.updateMany({
+      where: { userId: targetUserId },
+      data: { userId: null }
+    });
+    
+    await prisma.customOrder.updateMany({
+      where: { userId: targetUserId },
+      data: { userId: null }
+    });
+
+    // Delete target user
+    await prisma.user.delete({
+      where: { id: targetUserId }
+    });
+
+    return NextResponse.json({
+      message: 'User account deleted successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Delete user error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

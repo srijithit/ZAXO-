@@ -155,6 +155,26 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteUser = async (targetUserId: string, targetUserName: string) => {
+    if (!user || user.role !== 'ADMIN') return;
+    if (user.id === targetUserId) {
+      alert('Access Denied: You cannot delete your own admin account.');
+      return;
+    }
+    if (!confirm(`Are you sure you want to permanently delete user "${targetUserName}"? All their account data will be removed.`)) return;
+    try {
+      const res = await fetch(`/api/users?requesterId=${user.id}&targetUserId=${targetUserId}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete user');
+      alert('User deleted successfully.');
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.message || 'Error occurred while deleting user');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -1391,7 +1411,7 @@ export default function AdminPage() {
                           {usr.role}
                         </span>
                       </td>
-                      <td className="p-3 text-right">
+                      <td className="p-3 text-right flex items-center justify-end gap-2">
                         <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
                           <button
                             onClick={() => handleUpdateUserRole(usr.id, 'USER')}
@@ -1421,6 +1441,15 @@ export default function AdminPage() {
                             Admin
                           </button>
                         </div>
+                        {usr.id !== user?.id && (
+                          <button
+                            onClick={() => handleDeleteUser(usr.id, usr.name)}
+                            className="p-1.5 border border-slate-200 hover:border-rose-350 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600 transition-all flex items-center justify-center"
+                            title="Delete User Account"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
