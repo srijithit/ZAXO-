@@ -498,7 +498,7 @@ export default function AdminPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center text-slate-500">
         <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
-        <p className="text-sm font-semibold font-sans">Loading Admin CRM Workspace...</p>
+        <p className="text-sm font-semibold font-sans">Loading CRM Workspace...</p>
       </div>
     );
   }
@@ -511,10 +511,10 @@ export default function AdminPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-100 p-6 rounded-2xl shadow-premium gap-4">
         <div className="space-y-1">
           <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-            <Shield className="w-6 h-6 text-amber-500" /> ZAXO Admin Portal
+            <Shield className={`w-6 h-6 ${user?.role === 'ADMIN' ? 'text-amber-500' : 'text-indigo-500'}`} /> ZAXO {user?.role === 'ADMIN' ? 'Admin' : 'Staff'} Portal
           </h1>
           <p className="text-xs text-slate-500 font-semibold font-sans">
-            Logged in as Admin: {user?.name || 'Administrator'} (admin@zaxo.com)
+            Logged in as {user?.role === 'ADMIN' ? 'Admin' : 'Staff'}: {user?.name || 'User'} ({user?.email})
           </p>
         </div>
         <button 
