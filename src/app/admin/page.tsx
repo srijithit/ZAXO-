@@ -332,15 +332,30 @@ export default function AdminPage() {
     }
   };
 
-  // Handle local image file load as base64 representation
-  const handleLocalImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  // Handle local image file upload using Vercel Blob API
+  const handleLocalImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setIsUploadingImage(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        setFormImage(data.url);
+      } catch (error) {
+        console.error('Image upload error:', error);
+        alert('Failed to upload image to cloud storage. Please try again.');
+        setFormImage('');
+      } finally {
+        setIsUploadingImage(false);
+      }
     }
   };
 
@@ -1167,10 +1182,16 @@ export default function AdminPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={loading}
+                      disabled={loading || isUploadingImage}
                       className="px-4 py-2 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl text-xs shadow-md transition-all disabled:opacity-50"
                     >
-                      {loading ? 'Saving Product...' : editingProduct ? 'Save Updates' : 'Publish Product'}
+                      {loading 
+                        ? 'Saving Product...' 
+                        : isUploadingImage 
+                          ? 'Uploading Image...' 
+                          : editingProduct 
+                            ? 'Save Updates' 
+                            : 'Publish Product'}
                     </button>
                   </div>
 

@@ -36,6 +36,7 @@ export default function ProductDetailClient({ product, variants, reviews }: Prod
   const [logoFile, setLogoFile] = useState<string>(''); // base64 representation
   const [logoFileName, setLogoFileName] = useState('');
   const [logoPlacement, setLogoPlacement] = useState('Right Chest');
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   // UI States
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
@@ -54,16 +55,30 @@ export default function ProductDetailClient({ product, variants, reviews }: Prod
   const logoCharge = addLogo ? 150 : 0;
   const totalPrice = basePrice + nameCharge + logoCharge;
 
-  // Handle Logo Upload Mock
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Logo Upload with Vercel Blob
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setLogoFileName(file.name);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoFile(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setIsUploadingLogo(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        setLogoFile(data.url);
+      } catch (error) {
+        console.error('Logo upload error:', error);
+        alert('Failed to upload logo to cloud storage. Please try again.');
+        setLogoFileName('');
+        setLogoFile('');
+      } finally {
+        setIsUploadingLogo(false);
+      }
     }
   };
 
@@ -392,16 +407,18 @@ export default function ProductDetailClient({ product, variants, reviews }: Prod
             {/* Shopping CTAs */}
             <div className="flex gap-3 w-full">
               <button
+                disabled={isUploadingLogo}
                 onClick={() => handleAddToCart(false)}
-                className="flex-grow flex items-center justify-center gap-2 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition-all text-sm"
+                className="flex-grow flex items-center justify-center gap-2 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition-all text-sm disabled:opacity-50"
               >
-                <ShoppingBag className="w-4 h-4" /> Add to Cart
+                <ShoppingBag className="w-4 h-4" /> {isUploadingLogo ? 'Uploading...' : 'Add to Cart'}
               </button>
               <button
+                disabled={isUploadingLogo}
                 onClick={() => handleAddToCart(true)}
-                className="flex-grow py-3 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-md transition-all text-sm"
+                className="flex-grow py-3 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-md transition-all text-sm disabled:opacity-50"
               >
-                Buy It Now
+                {isUploadingLogo ? 'Uploading...' : 'Buy It Now'}
               </button>
             </div>
 

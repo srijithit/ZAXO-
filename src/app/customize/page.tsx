@@ -33,6 +33,7 @@ export default function CustomizePage() {
   // Logo upload state
   const [logoFile, setLogoFile] = useState('');
   const [logoFileName, setLogoFileName] = useState('');
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   // UI Flow States
   const [loading, setLoading] = useState(false);
@@ -61,15 +62,29 @@ export default function CustomizePage() {
     'Dusty Rose'
   ];
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setLogoFileName(file.name);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoFile(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setIsUploadingLogo(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        setLogoFile(data.url);
+      } catch (error) {
+        console.error('Logo upload error:', error);
+        alert('Failed to upload logo to cloud storage. Please try again.');
+        setLogoFileName('');
+        setLogoFile('');
+      } finally {
+        setIsUploadingLogo(false);
+      }
     }
   };
 
@@ -483,10 +498,14 @@ export default function CustomizePage() {
               {/* Submit CTA */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isUploadingLogo}
                 className="w-full py-3 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all text-sm disabled:opacity-50"
               >
-                {loading ? 'Submitting Quote Request...' : 'Submit Custom Quote Request'}
+                {loading 
+                  ? 'Submitting Quote Request...' 
+                  : isUploadingLogo 
+                    ? 'Uploading Logo to Cloud...' 
+                    : 'Submit Custom Quote Request'}
               </button>
 
             </form>

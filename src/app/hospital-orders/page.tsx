@@ -14,6 +14,7 @@ export default function HospitalOrdersPage() {
   const [notes, setNotes] = useState('');
   const [logoFile, setLogoFile] = useState('');
   const [logoFileName, setLogoFileName] = useState('');
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   // UI State
   const [loading, setLoading] = useState(false);
@@ -29,15 +30,29 @@ export default function HospitalOrdersPage() {
     'Custom Mixed Staff Uniforms'
   ];
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setLogoFileName(file.name);
-      const windowReader = new FileReader();
-      windowReader.onloadend = () => {
-        setLogoFile(windowReader.result as string);
-      };
-      windowReader.readAsDataURL(file);
+      setIsUploadingLogo(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        setLogoFile(data.url);
+      } catch (error) {
+        console.error('Logo upload error:', error);
+        alert('Failed to upload logo to cloud storage. Please try again.');
+        setLogoFileName('');
+        setLogoFile('');
+      } finally {
+        setIsUploadingLogo(false);
+      }
     }
   };
 
@@ -309,10 +324,14 @@ export default function HospitalOrdersPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isUploadingLogo}
                 className="w-full py-3 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all text-sm disabled:opacity-50"
               >
-                {loading ? 'Submitting Inquiry...' : 'Submit Procurement Inquiry'}
+                {loading 
+                  ? 'Submitting Inquiry...' 
+                  : isUploadingLogo 
+                    ? 'Uploading Logo to Cloud...' 
+                    : 'Submit Procurement Inquiry'}
               </button>
 
             </form>
