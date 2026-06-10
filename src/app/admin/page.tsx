@@ -1364,9 +1364,6 @@ export default function AdminPage() {
         <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-premium space-y-4 animate-in fade-in duration-200">
           <div className="flex justify-between items-center border-b pb-2">
             <h2 className="font-extrabold text-slate-800 text-base">Users & Staff Access Management</h2>
-            <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full">
-              Only Admins Can Grant Access
-            </span>
           </div>
 
           {loadingUsers ? (
