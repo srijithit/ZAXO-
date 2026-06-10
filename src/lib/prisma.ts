@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
 const globalForPrisma = globalThis as unknown as {
   _prismaClient: PrismaClient | undefined;
@@ -10,11 +9,12 @@ function createPrismaClient(): PrismaClient {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      'DATABASE_URL environment variable is not set. Please add it in Vercel → Settings → Environment Variables.'
+      'DATABASE_URL environment variable is not set.'
     );
   }
-  const pool = new Pool({ connectionString: url });
-  const adapter = new PrismaPg(pool);
+  // Remove file: prefix from sqlite database url
+  const cleanUrl = url.startsWith('file:') ? url.replace('file:', '') : url;
+  const adapter = new PrismaBetterSqlite3({ url: cleanUrl });
   return new PrismaClient({ adapter });
 }
 
