@@ -84,7 +84,7 @@ export default function CartPage() {
 
     const orderPayload = {
       userId: user?.id || null,
-      totalAmount: cartTotal,
+      totalAmount: cartTotal + 99,
       shippingAddress: shippingDetails,
       items: cart.map(item => ({
         product: { 
@@ -121,7 +121,7 @@ export default function CartPage() {
         const rzRes = await fetch('/api/payment/razorpay/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: cartTotal, orderId: orderObj.id })
+          body: JSON.stringify({ amount: cartTotal + 99, orderId: orderObj.id })
         });
         const rzData = await rzRes.json();
         if (!rzRes.ok) throw new Error(rzData.error || 'Failed to initialize Razorpay checkout');
@@ -131,7 +131,7 @@ export default function CartPage() {
           setRazorpaySimData({
             orderId: orderObj.id,
             razorpayOrderId: rzData.razorpay_order_id,
-            amount: cartTotal
+            amount: cartTotal + 99
           });
           setShowRazorpaySim(true);
           setLoading(false);
@@ -198,6 +198,27 @@ export default function CartPage() {
 
       // Handle WhatsApp checkout integration
       if (paymentMethod === 'WhatsApp') {
+        let paymentLink = '';
+        try {
+          const linkRes = await fetch('/api/payment/razorpay/link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: cartTotal + 99,
+              orderId: orderObj.id,
+              customerName: addressName,
+              customerEmail: addressEmail,
+              customerPhone: addressPhone
+            })
+          });
+          const linkData = await linkRes.json();
+          if (linkRes.ok) {
+            paymentLink = linkData.short_url;
+          }
+        } catch (err) {
+          console.error('Failed to generate payment link, falling back to message without link:', err);
+        }
+
         setCreatedOrder(orderObj);
         clearCart();
         setStep(4);
@@ -213,12 +234,18 @@ export default function CartPage() {
           return `• ${item.product.name} (Qty: ${item.quantity}, Size: ${item.variant.size}, Color: ${item.variant.color})${custText}`;
         }).join('\n');
 
-        const messageText = `Hi ZAXO Clothing, I've placed order #${orderObj.id.substring(0, 8)} on your site.\n\n*Order Details:*\n${itemsText}\n\n*Shipping Address:*\nName: ${addressName}\nAddress: ${streetAddress}, ${city} - ${postalCode}\nPhone: ${addressPhone}\n\n*Grand Total:* ₹${cartTotal}\n\nPlease share the payment instructions to confirm this order. Thank you!`;
+        let messageText = `Hi ZAXO Clothing, I've placed order #${orderObj.id.substring(0, 8)} on your site.\n\n*Order Details:*\n${itemsText}\n\n*Shipping Address:*\nName: ${addressName}\nAddress: ${streetAddress}, ${city} - ${postalCode}\nPhone: ${addressPhone}\n\n*Grand Total:* ₹${cartTotal + 99} (includes ₹99 shipping)\n\n`;
+
+        if (paymentLink) {
+          messageText += `*Direct Payment Link:* ${paymentLink}\n\nPlease click the link above to pay securely and confirm this order. Thank you!`;
+        } else {
+          messageText += `Please share the payment instructions to confirm this order. Thank you!`;
+        }
         
         const encodedMessage = encodeURIComponent(messageText);
         const whatsappUrl = `https://wa.me/919791471277?text=${encodedMessage}`;
 
-        window.open(whatsappUrl, '_blank');
+        window.location.href = whatsappUrl;
         setLoading(false);
         return;
       }
@@ -378,12 +405,12 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping Fee</span>
-                  <span className="text-emerald-600">FREE Shipping</span>
+                  <span className="text-slate-800 font-bold">₹99</span>
                 </div>
               </div>
               <div className="border-t pt-4 flex justify-between font-extrabold text-slate-800 text-lg">
                 <span>Grand Total</span>
-                <span>₹{cartTotal}</span>
+                <span>₹{cartTotal + 99}</span>
               </div>
               
               <button
@@ -493,9 +520,19 @@ export default function CartPage() {
             {/* Right side summary */}
             <div className="lg:col-span-4 bg-white border border-slate-100 p-6 rounded-2xl shadow-premium space-y-4">
               <h3 className="font-bold text-slate-800 border-b pb-2 text-base">Checkout Summary</h3>
-              <div className="flex justify-between font-extrabold text-slate-800 text-lg">
+              <div className="space-y-2 text-xs font-medium text-slate-600">
+                <div className="flex justify-between">
+                  <span>Cart Items Subtotal</span>
+                  <span>₹{cartTotal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping Fee</span>
+                  <span className="text-slate-800 font-bold">₹99</span>
+                </div>
+              </div>
+              <div className="border-t pt-4 flex justify-between font-extrabold text-slate-800 text-lg">
                 <span>Grand Total</span>
-                <span>₹{cartTotal}</span>
+                <span>₹{cartTotal + 99}</span>
               </div>
               <button
                 onClick={handleNextStep}
@@ -672,15 +709,25 @@ export default function CartPage() {
             {/* Right side summary */}
             <div className="lg:col-span-4 bg-white border border-slate-100 p-6 rounded-2xl shadow-premium space-y-4">
               <h3 className="font-bold text-slate-800 border-b pb-2 text-base">Payment Summary</h3>
-              <div className="space-y-1 text-xs text-slate-500">
+              <div className="space-y-1.5 text-xs text-slate-500">
                 <p>Deliver to: <strong>{addressName}</strong></p>
                 <p className="truncate">Address: {streetAddress}, {city}</p>
                 <p>Payment Mode: <strong>{paymentMethod}</strong></p>
               </div>
+              <div className="border-t pt-3 space-y-2 text-xs font-medium text-slate-600">
+                <div className="flex justify-between">
+                  <span>Cart Items Subtotal</span>
+                  <span>₹{cartTotal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping Fee</span>
+                  <span className="text-slate-800 font-bold">₹99</span>
+                </div>
+              </div>
               
               <div className="border-t pt-4 flex justify-between font-extrabold text-slate-800 text-lg">
                 <span>Grand Total</span>
-                <span>₹{cartTotal}</span>
+                <span>₹{cartTotal + 99}</span>
               </div>
               
               <button
@@ -688,7 +735,7 @@ export default function CartPage() {
                 disabled={loading}
                 className="w-full py-3 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all text-sm disabled:opacity-50"
               >
-                {loading ? 'Processing Checkout...' : `Confirm & Pay ₹${cartTotal}`}
+                {loading ? 'Processing Checkout...' : `Confirm & Pay ₹${cartTotal + 99}`}
               </button>
               <button
                 onClick={() => setStep(2)}

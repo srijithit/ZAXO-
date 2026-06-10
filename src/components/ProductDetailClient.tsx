@@ -17,7 +17,14 @@ export default function ProductDetailClient({ product, variants, reviews }: Prod
 
   // Pick unique colors and sizes from variants
   const availableColors = Array.from(new Set(variants.map(v => v.color)));
-  const availableSizes = Array.from(new Set(variants.map(v => v.size)));
+  const availableSizes = Array.from(new Set(variants.map(v => v.size))).sort((a, b) => {
+    const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'];
+    const idxA = sizeOrder.indexOf(a);
+    const idxB = sizeOrder.indexOf(b);
+    if (idxA === -1) return 1;
+    if (idxB === -1) return -1;
+    return idxA - idxB;
+  });
 
   // Selected Option States
   const [selectedColor, setSelectedColor] = useState(availableColors[0] || '');

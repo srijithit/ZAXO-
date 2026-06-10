@@ -18,10 +18,12 @@ export default function CustomizePage() {
   const [sizingMode, setSizingMode] = useState<'standard' | 'custom'>('standard');
 
   // Standard Sizing Mix
+  const [sizeXS, setSizeXS] = useState(0);
   const [sizeS, setSizeS] = useState(5);
   const [sizeM, setSizeM] = useState(5);
   const [sizeL, setSizeL] = useState(5);
   const [sizeXL, setSizeXL] = useState(0);
+  const [sizeXXL, setSizeXXL] = useState(0);
 
   // Custom Sizing Measurements (Individual Staff Member)
   const [staffName, setStaffName] = useState('');
@@ -39,6 +41,8 @@ export default function CustomizePage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [createdQuote, setCreatedQuote] = useState<any>(null);
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
+  const [activeSizeChartTab, setActiveSizeChartTab] = useState<'men' | 'women'>('men');
 
   const productTypes = [
     'V-Neck Scrubs',
@@ -108,7 +112,7 @@ export default function CustomizePage() {
     if (sizingMode === 'standard') {
       measurementsData = {
         type: 'standard-mix',
-        sizes: { S: sizeS, M: sizeM, L: sizeL, XL: sizeXL }
+        sizes: { XS: sizeXS, S: sizeS, M: sizeM, L: sizeL, XL: sizeXL, XXL: sizeXXL }
       };
     } else {
       measurementsData = {
@@ -364,8 +368,17 @@ export default function CustomizePage() {
                     <Ruler className="w-4 h-4 text-primary" /> Uniform Sizing Roster
                   </h3>
                   
-                  {/* Sizing Mode Pill Switch */}
-                  <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setIsSizeChartOpen(true)}
+                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                  >
+                    <Ruler className="w-3.5 h-3.5" /> Size Guide Chart
+                  </button>
+                </div>
+                  
+                {/* Sizing Mode Pill Switch */}
+                <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
                     <button
                       type="button"
                       onClick={() => setSizingMode('standard')}
@@ -385,13 +398,22 @@ export default function CustomizePage() {
                       Bespoke Staff Measurements
                     </button>
                   </div>
-                </div>
 
                 {sizingMode === 'standard' ? (
                   /* Standard Sizing Counts */
-                  <div className="grid grid-cols-4 gap-4 p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 p-4 bg-slate-50 border border-slate-100 rounded-2xl">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 text-center uppercase mb-1">Small (S)</label>
+                      <label className="block text-[10px] font-bold text-slate-505 text-center uppercase mb-1">XS</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={sizeXS}
+                        onChange={(e) => setSizeXS(parseInt(e.target.value) || 0)}
+                        className="w-full text-center px-2 py-1 border border-slate-200 rounded-lg text-sm bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-505 text-center uppercase mb-1">S</label>
                       <input
                         type="number"
                         min={0}
@@ -401,7 +423,7 @@ export default function CustomizePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 text-center uppercase mb-1">Medium (M)</label>
+                      <label className="block text-[10px] font-bold text-slate-505 text-center uppercase mb-1">M</label>
                       <input
                         type="number"
                         min={0}
@@ -411,7 +433,7 @@ export default function CustomizePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 text-center uppercase mb-1">Large (L)</label>
+                      <label className="block text-[10px] font-bold text-slate-505 text-center uppercase mb-1">L</label>
                       <input
                         type="number"
                         min={0}
@@ -421,12 +443,22 @@ export default function CustomizePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 text-center uppercase mb-1">X-Large (XL)</label>
+                      <label className="block text-[10px] font-bold text-slate-505 text-center uppercase mb-1">XL</label>
                       <input
                         type="number"
                         min={0}
                         value={sizeXL}
                         onChange={(e) => setSizeXL(parseInt(e.target.value) || 0)}
+                        className="w-full text-center px-2 py-1 border border-slate-200 rounded-lg text-sm bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-505 text-center uppercase mb-1">XXL</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={sizeXXL}
+                        onChange={(e) => setSizeXXL(parseInt(e.target.value) || 0)}
                         className="w-full text-center px-2 py-1 border border-slate-200 rounded-lg text-sm bg-white"
                       />
                     </div>
@@ -511,6 +543,181 @@ export default function CustomizePage() {
             </form>
           </div>
 
+        </div>
+      )}
+
+      {/* Size Chart Modal */}
+      {isSizeChartOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-premium overflow-hidden border border-slate-100">
+            <div className="bg-gradient-to-r from-primary to-primary-dark p-5 text-white flex justify-between items-center">
+              <h2 className="text-xl font-bold tracking-tight text-white">ZAXO Size Measurement Chart</h2>
+              <button 
+                type="button"
+                onClick={() => setIsSizeChartOpen(false)}
+                className="text-white/80 hover:text-white font-bold text-lg"
+              >
+                Close (X)
+              </button>
+            </div>
+            
+            <div className="p-6">
+              
+              {/* Tab Selector */}
+              <div className="flex border-b mb-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveSizeChartTab('men')}
+                  className={`flex-grow py-2 text-sm font-bold text-center border-b-2 transition-all ${
+                    activeSizeChartTab === 'men' 
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  Men's Sizing (Inches)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSizeChartTab('women')}
+                  className={`flex-grow py-2 text-sm font-bold text-center border-b-2 transition-all ${
+                    activeSizeChartTab === 'women' 
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  Women's Sizing (Inches)
+                </button>
+              </div>
+
+              {/* Table details from pages 12-13 of catalog */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100 text-slate-700 uppercase font-bold text-[10px]">
+                      <th className="p-2.5 border-b">Size Label</th>
+                      <th className="p-2.5 border-b">{activeSizeChartTab === 'men' ? 'Chest' : 'Bust'}</th>
+                      <th className="p-2.5 border-b">Waist</th>
+                      <th className="p-2.5 border-b">Hips</th>
+                      <th className="p-2.5 border-b">Shoulder</th>
+                      <th className="p-2.5 border-b">Length</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-600 font-medium divide-y">
+                    {activeSizeChartTab === 'men' ? (
+                      <>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">XS</td>
+                          <td className="p-2.5">34" - 36"</td>
+                          <td className="p-2.5">28" - 30"</td>
+                          <td className="p-2.5">34" - 36"</td>
+                          <td className="p-2.5">16.5"</td>
+                          <td className="p-2.5">27.5"</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">S</td>
+                          <td className="p-2.5">36" - 38"</td>
+                          <td className="p-2.5">30" - 32"</td>
+                          <td className="p-2.5">36" - 38"</td>
+                          <td className="p-2.5">17"</td>
+                          <td className="p-2.5">28.5"</td>
+                        </tr>
+                        <tr className="bg-slate-50/50">
+                          <td className="p-2.5 font-bold text-slate-800">M</td>
+                          <td className="p-2.5">38" - 40"</td>
+                          <td className="p-2.5">32" - 34"</td>
+                          <td className="p-2.5">38" - 40"</td>
+                          <td className="p-2.5">17.5"</td>
+                          <td className="p-2.5">29.5"</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">L</td>
+                          <td className="p-2.5">40" - 42"</td>
+                          <td className="p-2.5">34" - 36"</td>
+                          <td className="p-2.5">40" - 42"</td>
+                          <td className="p-2.5">18.2"</td>
+                          <td className="p-2.5">30.5"</td>
+                        </tr>
+                        <tr className="bg-slate-50/50">
+                          <td className="p-2.5 font-bold text-slate-800">XL</td>
+                          <td className="p-2.5">42" - 44"</td>
+                          <td className="p-2.5">36" - 38"</td>
+                          <td className="p-2.5">42" - 44"</td>
+                          <td className="p-2.5">19"</td>
+                          <td className="p-2.5">31"</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">XXL</td>
+                          <td className="p-2.5">44" - 46"</td>
+                          <td className="p-2.5">38" - 40"</td>
+                          <td className="p-2.5">44" - 46"</td>
+                          <td className="p-2.5">20"</td>
+                          <td className="p-2.5">32"</td>
+                        </tr>
+                      </>
+                    ) : (
+                      <>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">XS</td>
+                          <td className="p-2.5">32" - 34"</td>
+                          <td className="p-2.5">24" - 26"</td>
+                          <td className="p-2.5">32" - 34"</td>
+                          <td className="p-2.5">14.5"</td>
+                          <td className="p-2.5">25.5"</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">S</td>
+                          <td className="p-2.5">34" - 36"</td>
+                          <td className="p-2.5">26" - 28"</td>
+                          <td className="p-2.5">34" - 36"</td>
+                          <td className="p-2.5">15"</td>
+                          <td className="p-2.5">26.5"</td>
+                        </tr>
+                        <tr className="bg-slate-50/50">
+                          <td className="p-2.5 font-bold text-slate-800">M</td>
+                          <td className="p-2.5">36" - 38"</td>
+                          <td className="p-2.5">28" - 30"</td>
+                          <td className="p-2.5">36" - 38"</td>
+                          <td className="p-2.5">15.5"</td>
+                          <td className="p-2.5">27.5"</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">L</td>
+                          <td className="p-2.5">38" - 40"</td>
+                          <td className="p-2.5">30" - 32"</td>
+                          <td className="p-2.5">38" - 40"</td>
+                          <td className="p-2.5">16.2"</td>
+                          <td className="p-2.5">28.5"</td>
+                        </tr>
+                        <tr className="bg-slate-50/50">
+                          <td className="p-2.5 font-bold text-slate-800">XL</td>
+                          <td className="p-2.5">40" - 42"</td>
+                          <td className="p-2.5">32" - 34"</td>
+                          <td className="p-2.5">40" - 42"</td>
+                          <td className="p-2.5">17"</td>
+                          <td className="p-2.5">29"</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2.5 font-bold text-slate-800">XXL</td>
+                          <td className="p-2.5">42" - 44"</td>
+                          <td className="p-2.5">34" - 36"</td>
+                          <td className="p-2.5">42" - 44"</td>
+                          <td className="p-2.5">18.5"</td>
+                          <td className="p-2.5">30"</td>
+                        </tr>
+                      </>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-4 p-3 bg-amber-50 text-amber-700 text-xs rounded-xl flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Tip:</strong> If measurements fall between sizes, we recommend ordering the larger size for a relaxed, comfortable fit.
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

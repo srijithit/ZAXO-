@@ -1677,11 +1677,11 @@ export default function AdminPage() {
             <div className="space-y-1.5 text-xs text-right font-medium text-slate-600">
               <div className="flex justify-between max-w-[200px] ml-auto">
                 <span>Subtotal:</span>
-                <span>₹{selectedPrintOrder.totalAmount}</span>
+                <span>₹{selectedPrintOrder.totalAmount - 99}</span>
               </div>
               <div className="flex justify-between max-w-[200px] ml-auto">
                 <span>Shipping:</span>
-                <span className="text-emerald-600 font-bold">FREE</span>
+                <span className="text-slate-800 font-bold">₹99</span>
               </div>
               <div className="flex justify-between max-w-[200px] ml-auto border-t pt-2 text-sm font-extrabold text-slate-900">
                 <span>Total Amount:</span>
