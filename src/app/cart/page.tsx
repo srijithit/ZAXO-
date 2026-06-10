@@ -37,7 +37,7 @@ export default function CartPage() {
   const [stateName, setStateName] = useState('');
 
   // Payment Method State
-  const [paymentMethod, setPaymentMethod] = useState('UPI'); // UPI, Razorpay, COD, WhatsApp
+  const [paymentMethod, setPaymentMethod] = useState('Razorpay'); // Razorpay, COD, WhatsApp
   const [transactionRef, setTransactionRef] = useState('');
 
   // Created Order details
@@ -65,11 +65,7 @@ export default function CartPage() {
   const handlePlaceOrder = async () => {
     setLoading(true);
     
-    if ((paymentMethod === 'UPI' || paymentMethod === 'BankTransfer') && !transactionRef.trim()) {
-      alert('Please enter your payment Transaction ID / Ref No. for verification.');
-      setLoading(false);
-      return;
-    }
+
 
     const shippingDetails = {
       name: addressName,
@@ -558,90 +554,7 @@ export default function CartPage() {
               <h2 className="text-xl font-extrabold text-slate-800">Select Payment Method (Simulated Gateway)</h2>
               
               <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-premium space-y-4">
-                     {/* UPI Option */}
-                <label className={`flex flex-col p-4 rounded-xl border cursor-pointer select-none transition-all ${
-                  paymentMethod === 'UPI' ? 'border-primary bg-teal-50/10' : 'border-slate-200'
-                }`}>
-                  <div className="flex items-start">
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === 'UPI'}
-                      onChange={() => setPaymentMethod('UPI')}
-                      className="mt-1 text-primary focus:ring-primary"
-                    />
-                    <div className="ml-3">
-                      <h4 className="font-bold text-slate-800 text-sm">UPI Payment (GPay, PhonePe, Paytm)</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">Pay instantly using your preferred UPI app. Instant authorization.</p>
-                    </div>
-                  </div>
-                  {paymentMethod === 'UPI' && (
-                    <div className="mt-3 ml-6 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-3 text-slate-700 animate-in fade-in duration-200">
-                      <div>
-                        <p><strong>Official UPI ID:</strong> <span className="font-bold text-slate-900 select-all">9791471277@kotakbank</span></p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Transfer the exact grand total to this UPI ID to authorize your order.</p>
-                      </div>
-                      <div className="space-y-1.5 border-t pt-3">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Transaction Ref / UTR No. *</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="E.g., 612093849182"
-                          value={transactionRef}
-                          onChange={(e) => setTransactionRef(e.target.value)}
-                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary bg-white font-semibold text-slate-800"
-                        />
-                        <p className="text-[9px] text-slate-400">Enter the 12-digit UPI transaction reference/UTR number from your payment app.</p>
-                      </div>
-                    </div>
-                  )}
-                </label>
-
-                {/* Direct Bank Transfer Option */}
-                <label className={`flex flex-col p-4 rounded-xl border cursor-pointer select-none transition-all ${
-                  paymentMethod === 'BankTransfer' ? 'border-primary bg-teal-50/10' : 'border-slate-200'
-                }`}>
-                  <div className="flex items-start">
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === 'BankTransfer'}
-                      onChange={() => setPaymentMethod('BankTransfer')}
-                      className="mt-1 text-primary focus:ring-primary"
-                    />
-                    <div className="ml-3">
-                      <h4 className="font-bold text-slate-800 text-sm">Direct Bank Transfer (NEFT / IMPS / RTGS)</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">Transfer funds directly into our corporate bank account. Orders are processed upon verification.</p>
-                    </div>
-                  </div>
-                  {paymentMethod === 'BankTransfer' && (
-                    <div className="mt-4 ml-6 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-3.5 text-slate-700 animate-in fade-in duration-200">
-                      <div>
-                        <p className="font-bold text-slate-800 uppercase tracking-wider text-[10px] border-b pb-1 mb-2">Zaxo Clothing Corporate Bank Details</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <p><span className="text-slate-400 font-semibold">Account Name:</span> <strong className="text-slate-850">ZAXO CLOTHING</strong></p>
-                          <p><span className="text-slate-400 font-semibold">Bank Name:</span> <strong className="text-slate-850">HDFC Bank Ltd</strong></p>
-                          <p><span className="text-slate-400 font-semibold">Account Number:</span> <strong className="text-slate-850">50200088899912</strong></p>
-                          <p><span className="text-slate-400 font-semibold">IFSC Code:</span> <strong className="text-slate-850">HDFC0000123</strong></p>
-                          <p><span className="text-slate-400 font-semibold">Branch Name:</span> <strong className="text-slate-850">Ganapathy, Coimbatore</strong></p>
-                          <p><span className="text-slate-400 font-semibold">Account Type:</span> <strong className="text-slate-850">Current Account</strong></p>
-                        </div>
-                      </div>
-                      <div className="space-y-1.5 border-t pt-3">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Transaction Ref / UTR No. *</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="E.g., NEFT/IMPS/HDFCR520..."
-                          value={transactionRef}
-                          onChange={(e) => setTransactionRef(e.target.value)}
-                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary bg-white font-semibold text-slate-800"
-                        />
-                        <p className="text-[9px] text-slate-400">Enter the transaction UTR number or transfer reference code from your bank transfer confirmation receipt.</p>
-                      </div>
-                    </div>
-                  )}
-                </label>
+  
 
                 {/* Razorpay Card Option */}
                 <label className={`flex items-start p-4 rounded-xl border cursor-pointer select-none transition-all ${
