@@ -57,6 +57,8 @@ export default function AdminPage() {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [logsList, setLogsList] = useState<any[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
 
   // Active pricing quote state
   const [quoteInput, setQuoteInput] = useState<Record<string, string>>({});
@@ -114,6 +116,38 @@ export default function AdminPage() {
       console.error('Failed to fetch admin dashboard data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLogs = async () => {
+    if (!user || user.role !== 'ADMIN') return;
+    try {
+      setLoadingLogs(true);
+      const res = await fetch(`/api/logs?requesterId=${user.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setLogsList(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch logs:', err);
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  const handleClearLogs = async () => {
+    if (!user || user.role !== 'ADMIN') return;
+    if (!confirm('Are you sure you want to permanently clear all activity logs?')) return;
+    try {
+      const res = await fetch(`/api/logs?requesterId=${user.id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        alert('Logs cleared successfully');
+        fetchLogs();
+      }
+    } catch (err) {
+      console.error('Failed to clear logs:', err);
     }
   };
 
@@ -184,6 +218,12 @@ export default function AdminPage() {
       fetchUsers();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && user.role === 'ADMIN' && activeTab === 'logs') {
+      fetchLogs();
+    }
+  }, [user, activeTab]);
 
   // Update Retail Order Status
   const handleUpdateOrderStatus = async (orderId: string, status: string) => {
@@ -587,6 +627,18 @@ export default function AdminPage() {
             }`}
           >
             <UserCheck className="w-4 h-4 text-indigo-650" /> Users & Staff ({usersList.length})
+          </button>
+        )}
+        {user && user.role === 'ADMIN' && (
+          <button
+            onClick={() => setActiveTab('logs')}
+            className={`px-4 py-3 text-xs font-bold text-center border-b-2 flex items-center gap-1.5 transition-all shrink-0 ${
+              activeTab === 'logs' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <Settings className="w-4 h-4 text-rose-650" /> System Logs
           </button>
         )}
       </div>
@@ -1355,12 +1407,11 @@ export default function AdminPage() {
 
               </div>
             </div>
-          )}
-
+           )}
         </div>
       )}
 
-      {activeTab === 'users' && user?.role === 'ADMIN' && (
+       {activeTab === 'users' && user?.role === 'ADMIN' && (
         <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-premium space-y-4 animate-in fade-in duration-200">
           <div className="flex justify-between items-center border-b pb-2">
             <h2 className="font-extrabold text-slate-800 text-base">Users & Staff Access Management</h2>
@@ -1389,7 +1440,7 @@ export default function AdminPage() {
                   {usersList.map((usr) => (
                     <tr key={usr.id} className="hover:bg-slate-50/50">
                       <td className="p-3">
-                        <p className="font-bold text-slate-850">{usr.name}</p>
+                        <p className="font-bold text-slate-855">{usr.name}</p>
                         <p className="text-[10px] text-slate-400 font-mono mt-0.5">{usr.id}</p>
                       </td>
                       <td className="p-3 space-y-0.5">
@@ -1448,6 +1499,64 @@ export default function AdminPage() {
                           </button>
                         )}
                       </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'logs' && user?.role === 'ADMIN' && (
+        <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-premium space-y-4 animate-in fade-in duration-200">
+          <div className="flex justify-between items-center border-b pb-2">
+            <h2 className="font-extrabold text-slate-800 text-base">System Audit & Activity Logs</h2>
+            <button
+              onClick={handleClearLogs}
+              disabled={logsList.length === 0}
+              className="px-3.5 py-1.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+            >
+              Clear All Logs
+            </button>
+          </div>
+
+          {loadingLogs ? (
+            <div className="text-center py-12 text-slate-500">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+              <p className="text-xs font-semibold">Loading system activity logs...</p>
+            </div>
+          ) : logsList.length === 0 ? (
+            <p className="text-sm text-slate-400 py-8 text-center font-medium">No system activity logged yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-700 uppercase font-bold text-[9px]">
+                    <th className="p-3 border-b">Timestamp</th>
+                    <th className="p-3 border-b">Action</th>
+                    <th className="p-3 border-b">Details / Description</th>
+                    <th className="p-3 border-b">Performed By</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y text-slate-600 font-medium">
+                  {logsList.map((log) => (
+                    <tr key={log.id} className="hover:bg-slate-50/50">
+                      <td className="p-3 text-[10px] text-slate-400 font-sans">
+                        {new Date(log.createdAt).toLocaleString('en-IN')}
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
+                          log.action.startsWith('DELETE') || log.action === 'CLEAR_LOGS' ? 'bg-rose-100 text-rose-800' :
+                          log.action.startsWith('CREATE') ? 'bg-emerald-100 text-emerald-800' :
+                          log.action.startsWith('UPDATE') ? 'bg-indigo-100 text-indigo-800' :
+                          'bg-slate-100 text-slate-750'
+                        }`}>
+                          {log.action}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-800 font-semibold">{log.details}</td>
+                      <td className="p-3 font-medium text-slate-505">{log.performedBy}</td>
                     </tr>
                   ))}
                 </tbody>

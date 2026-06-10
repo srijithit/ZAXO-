@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 
 // Fetch orders (either all for admin, or filter by userId)
 export async function GET(request: Request) {
@@ -98,6 +99,12 @@ export async function PUT(request: Request) {
       data: updateData
     });
 
+    // Log the update action
+    const statusText = status ? `status to "${status}"` : '';
+    const paymentText = paymentStatus ? `payment status to "${paymentStatus}"` : '';
+    const logDetails = `Updated order #${orderId.slice(0, 8)}: ${[statusText, paymentText].filter(Boolean).join(' and ')}.`;
+    await createAuditLog('UPDATE_ORDER', logDetails, 'Admin/Staff');
+
     return NextResponse.json({
       message: 'Order updated successfully',
       order: updatedOrder
@@ -121,6 +128,9 @@ export async function DELETE(request: Request) {
     await prisma.order.delete({
       where: { id: orderId }
     });
+
+    // Log the delete action
+    await createAuditLog('DELETE_ORDER', `Deleted order log record #${orderId.slice(0, 8)}.`, 'Admin');
 
     return NextResponse.json({ message: 'Order deleted successfully' });
   } catch (error: any) {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 
 // Fetch bulk leads (for admin dashboard)
 export async function GET(request: Request) {
@@ -73,6 +74,13 @@ export async function PUT(request: Request) {
       data: { status }
     });
 
+    // Log the update action
+    await createAuditLog(
+      'UPDATE_LEAD_STATUS',
+      `Updated bulk lead status of "${updatedLead.hospitalName}" to "${status}".`,
+      'Admin/Staff'
+    );
+
     return NextResponse.json({
       message: 'Lead status updated successfully',
       lead: updatedLead
@@ -94,9 +102,22 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Lead ID is required' }, { status: 400 });
     }
 
+    const targetLead = await prisma.bulkLead.findUnique({
+      where: { id: leadId }
+    });
+
     await prisma.bulkLead.delete({
       where: { id: leadId }
     });
+
+    if (targetLead) {
+      // Log the delete action
+      await createAuditLog(
+        'DELETE_LEAD',
+        `Deleted B2B bulk lead from "${targetLead.hospitalName}" (Contact: ${targetLead.contactName}).`,
+        'Admin'
+      );
+    }
 
     return NextResponse.json({ message: 'B2B lead deleted successfully' });
   } catch (error: any) {

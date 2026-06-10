@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 
 // Fetch custom orders (supports filtering by userId for client history, or all for admin)
 export async function GET(request: Request) {
@@ -109,6 +110,12 @@ export async function PUT(request: Request) {
       data: updateData
     });
 
+    // Log the update/quote action
+    const quoteText = priceQuote !== undefined ? `with price quote ₹${priceQuote}` : '';
+    const statusText = status ? `status to "${status}"` : '';
+    const details = `Updated B2B bespoke order for "${updatedCustomOrder.hospitalName}" ${[statusText, quoteText].filter(Boolean).join(' ')}.`;
+    await createAuditLog('UPDATE_CUSTOM_QUOTE', details, 'Admin/Staff');
+
     return NextResponse.json({
       message: 'Custom order updated successfully',
       customOrder: updatedCustomOrder
@@ -130,9 +137,22 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Custom Order ID is required' }, { status: 400 });
     }
 
+    const targetOrder = await prisma.customOrder.findUnique({
+      where: { id: customOrderId }
+    });
+
     await prisma.customOrder.delete({
       where: { id: customOrderId }
     });
+
+    if (targetOrder) {
+      // Log the delete action
+      await createAuditLog(
+        'DELETE_CUSTOM_QUOTE',
+        `Deleted B2B bespoke quote request for "${targetOrder.hospitalName}" (${targetOrder.productType}).`,
+        'Admin'
+      );
+    }
 
     return NextResponse.json({ message: 'B2B quote deleted successfully' });
   } catch (error: any) {

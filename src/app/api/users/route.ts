@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 
 // Fetch all users (for admin dashboard, restricted to admin only)
 export async function GET(request: Request) {
@@ -72,6 +73,13 @@ export async function PUT(request: Request) {
       }
     });
 
+    // Log the action
+    await createAuditLog(
+      'UPDATE_USER_ROLE',
+      `Changed role of user "${updatedUser.name}" (${updatedUser.email}) to "${newRole}".`,
+      requester.email
+    );
+
     return NextResponse.json({
       message: `User role updated to ${newRole} successfully`,
       user: updatedUser
@@ -106,6 +114,14 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Unauthorized. Only admins can delete user accounts.' }, { status: 403 });
     }
 
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId }
+    });
+
+    if (!targetUser) {
+      return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
+    }
+
     // Set null on relations first to prevent any potential database constraints
     await prisma.order.updateMany({
       where: { userId: targetUserId },
@@ -121,6 +137,13 @@ export async function DELETE(request: Request) {
     await prisma.user.delete({
       where: { id: targetUserId }
     });
+
+    // Log the action
+    await createAuditLog(
+      'DELETE_USER',
+      `Permanently deleted user account "${targetUser.name}" (${targetUser.email}).`,
+      requester.email
+    );
 
     return NextResponse.json({
       message: 'User account deleted successfully'

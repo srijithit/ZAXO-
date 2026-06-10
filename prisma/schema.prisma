@@ -100,3 +100,12 @@ model Review {
   comment   String
   createdAt DateTime @default(now())
 }
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String   // E.g., "CREATE_PRODUCT", "DELETE_ORDER", "UPDATE_ROLE"
+  details     String   // Description of the action
+  performedBy String   // Name/Email of the admin/staff member who did it
+  createdAt   DateTime @default(now())
+}
+

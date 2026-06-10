@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 
 // Fetch products
 export async function GET(request: Request) {
@@ -125,6 +126,13 @@ export async function POST(request: Request) {
       data: variantData
     });
 
+    // Log the product creation
+    await createAuditLog(
+      'CREATE_PRODUCT',
+      `Published new product "${name}" in category "${category}" with automatic variants.`,
+      'Admin/Staff'
+    );
+
     return NextResponse.json({
       message: 'Product created successfully',
       product: newProduct
@@ -188,6 +196,13 @@ export async function PUT(request: Request) {
       data: updateData
     });
 
+    // Log the product update
+    await createAuditLog(
+      'UPDATE_PRODUCT',
+      `Modified details of product "${updatedProduct.name}" (ID: ${id.slice(0, 8)}).`,
+      'Admin/Staff'
+    );
+
     return NextResponse.json({
       message: 'Product updated successfully',
       product: updatedProduct
@@ -209,9 +224,22 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
     }
 
+    const targetProduct = await prisma.product.findUnique({
+      where: { id }
+    });
+
     await prisma.product.delete({
       where: { id }
     });
+
+    if (targetProduct) {
+      // Log the product delete action
+      await createAuditLog(
+        'DELETE_PRODUCT',
+        `Permanently deleted product "${targetProduct.name}" (ID: ${id.slice(0, 8)}) and its variants.`,
+        'Admin'
+      );
+    }
 
     return NextResponse.json({
       message: 'Product deleted successfully'
