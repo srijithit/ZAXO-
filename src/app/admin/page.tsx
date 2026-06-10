@@ -226,12 +226,12 @@ export default function AdminPage() {
   }, [user, activeTab]);
 
   // Update Retail Order Status
-  const handleUpdateOrderStatus = async (orderId: string, status: string) => {
+  const handleUpdateOrderStatus = async (orderId: string, status?: string, paymentStatus?: string) => {
     try {
       const res = await fetch('/api/orders', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, status })
+        body: JSON.stringify({ orderId, status, paymentStatus })
       });
       if (!res.ok) throw new Error('Update failed');
       
@@ -763,6 +763,11 @@ export default function AdminPage() {
                         <td className="p-3">
                           <p className="font-bold text-slate-800">{shipping.name}</p>
                           <p className="text-[10px] text-slate-400">{shipping.phone} | {shipping.city}</p>
+                          {shipping.transactionRef && (
+                            <p className="mt-1 font-semibold text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-150 rounded px-1.5 py-0.5 inline-block select-all" title="Transaction reference / UTR">
+                              Ref/UTR: {shipping.transactionRef}
+                            </p>
+                          )}
                         </td>
                         <td className="p-3">
                           <p className="font-semibold text-slate-800">{items.length} items</p>
@@ -820,6 +825,15 @@ export default function AdminPage() {
                           </span>
                         </td>
                         <td className="p-3 flex gap-2">
+                          {order.paymentStatus === 'UNPAID' && (
+                            <button
+                              onClick={() => handleUpdateOrderStatus(order.id, undefined, 'PAID')}
+                              className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold"
+                              title="Confirm Payment Received"
+                            >
+                              Confirm Payment
+                            </button>
+                          )}
                           {order.status === 'PENDING' && (
                             <button
                               onClick={() => handleUpdateOrderStatus(order.id, 'SHIPPED')}
