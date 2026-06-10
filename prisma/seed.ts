@@ -1,11 +1,22 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
 const url = process.env.DATABASE_URL || 'file:./dev.db';
-const cleanUrl = url.startsWith('file:') ? url.replace('file:', '') : url;
-const adapter = new PrismaBetterSqlite3({ url: cleanUrl });
-const prisma = new PrismaClient({ adapter });
+
+let prisma: PrismaClient;
+
+if (url.startsWith('postgres') || url.startsWith('postgresql')) {
+  const { PrismaPg } = require('@prisma/adapter-pg');
+  const { Pool } = require('pg');
+  const pool = new Pool({ connectionString: url });
+  const adapter = new PrismaPg(pool);
+  prisma = new PrismaClient({ adapter });
+} else {
+  const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+  const cleanUrl = url.startsWith('file:') ? url.replace('file:', '') : url;
+  const adapter = new PrismaBetterSqlite3({ url: cleanUrl });
+  prisma = new PrismaClient({ adapter });
+}
 
 
 
