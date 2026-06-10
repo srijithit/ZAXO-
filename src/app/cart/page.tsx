@@ -532,7 +532,7 @@ export default function CartPage() {
                   </div>
                   {paymentMethod === 'UPI' && (
                     <div className="mt-3 ml-6 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1.5 text-slate-700 animate-in fade-in duration-200">
-                      <p><strong>Official UPI ID:</strong> <span className="font-bold text-slate-900 select-all">zaxoclothing@okaxis</span></p>
+                      <p><strong>Official UPI ID:</strong> <span className="font-bold text-slate-900 select-all">9791471277@kotakbank</span></p>
                       <p className="text-[10px] text-slate-400">Transfer the exact grand total to this UPI ID to authorize your order.</p>
                     </div>
                   )}
