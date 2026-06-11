@@ -25,7 +25,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isOtpMode, setIsOtpMode] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [simulatedOtp, setSimulatedOtp] = useState<string | null>(null);
   const [timer, setTimer] = useState(0);
   const [isOtpRegister, setIsOtpRegister] = useState(false);
 
@@ -55,7 +54,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setIsOtpMode(false);
       setOtpCode('');
       setOtpSent(false);
-      setSimulatedOtp(null);
       setTimer(0);
       setIsOtpRegister(false);
     }
@@ -93,7 +91,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           }
 
           setOtpSent(true);
-          setSimulatedOtp(data.otp);
           setTimer(30); // 30 seconds cooldown
         } else {
           // STEP 2: Verify OTP
@@ -123,7 +120,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             setName('');
             setOtpCode('');
             setOtpSent(false);
-            setSimulatedOtp(null);
           }, 1000);
         }
       } else {
@@ -202,7 +198,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         throw new Error(data.error || 'Failed to resend OTP');
       }
 
-      setSimulatedOtp(data.otp);
       setTimer(30);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
@@ -363,7 +358,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         {isOtpRegister && (
                           <>
                             <div>
-                              <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Full Name</label>
+                              <label className="block text-xs font-semibold text-slate-605 uppercase mb-1">Full Name</label>
                               <div className="relative">
                                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                                   <User className="w-4 h-4" />
@@ -380,7 +375,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                             </div>
 
                             <div>
-                              <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Email Address</label>
+                              <label className="block text-xs font-semibold text-slate-605 uppercase mb-1">Email Address</label>
                               <div className="relative">
                                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                                   <Mail className="w-4 h-4" />
@@ -399,7 +394,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         )}
 
                         <div>
-                          <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Phone Number</label>
+                          <label className="block text-xs font-semibold text-slate-605 uppercase mb-1">Phone Number</label>
                           <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                               <Phone className="w-4 h-4" />
@@ -426,21 +421,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       </>
                     ) : (
                       <>
-                        {/* Simulation notification */}
-                        {simulatedOtp && (
-                          <div className="p-3.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs flex flex-col gap-1.5 shadow-sm animate-in fade-in slide-in-from-top-2 duration-305">
-                            <p className="font-bold flex items-center gap-1.5 text-amber-900">
-                              <span className="animate-pulse">🔑</span> Simulated SMS Received:
-                            </p>
-                            <p>
-                              Your ZAXO verification OTP is{' '}
-                              <strong className="text-sm font-extrabold bg-white px-2.5 py-0.5 border border-amber-300 rounded shadow-sm tracking-widest text-primary">
-                                {simulatedOtp}
-                              </strong>
-                            </p>
-                          </div>
-                        )}
-
                         <div className="text-center py-1">
                           <p className="text-xs text-slate-500">
                             Verification code sent to <strong className="text-slate-700">{phone}</strong>
@@ -448,7 +428,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-slate-600 uppercase mb-1 text-center">Enter 6-Digit OTP</label>
+                          <label className="block text-xs font-semibold text-slate-605 uppercase mb-1 text-center">Enter 6-Digit OTP</label>
                           <div className="relative max-w-[200px] mx-auto">
                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                               <Key className="w-4 h-4" />
@@ -478,7 +458,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                             type="button"
                             onClick={() => {
                               setOtpSent(false);
-                              setSimulatedOtp(null);
                               setOtpCode('');
                               setError('');
                             }}
@@ -506,7 +485,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     {!isLoginView && (
                       <>
                         <div>
-                          <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Full Name</label>
+                          <label className="block text-xs font-semibold text-slate-605 uppercase mb-1">Full Name</label>
                           <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                               <User className="w-4 h-4" />
@@ -523,7 +502,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         </div>
                         
                         <div>
-                          <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Phone Number</label>
+                          <label className="block text-xs font-semibold text-slate-605 uppercase mb-1">Phone Number</label>
                           <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                               <Phone className="w-4 h-4" />
@@ -542,7 +521,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     )}
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Email Address</label>
+                      <label className="block text-xs font-semibold text-slate-605 uppercase mb-1">Email Address</label>
                       <div className="relative">
                         <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                           <Mail className="w-4 h-4" />
@@ -559,7 +538,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Password</label>
+                      <label className="block text-xs font-semibold text-slate-650 uppercase mb-1">Password</label>
                       <div className="relative">
                         <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                           <Lock className="w-4 h-4" />
