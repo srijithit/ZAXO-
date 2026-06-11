@@ -732,10 +732,15 @@ export default function CartPage() {
             
             {/* Simulation Header */}
             <div className="bg-blue-600 text-white p-6 flex justify-between items-start">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-blue-100">Razorpay Checkout</p>
-                <h3 className="text-xl font-extrabold mt-1">ZAXO Clothing Merchant</h3>
-                <p className="text-xs text-blue-200 mt-1 select-all">Order ID: {razorpaySimData.razorpayOrderId}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-md shrink-0">
+                  <img src="/images/logo.png" alt="ZAXO" className="w-full h-full object-contain p-1" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-blue-100">Razorpay Checkout</p>
+                  <h3 className="text-xl font-extrabold mt-0.5">ZAXO Clothing</h3>
+                  <p className="text-xs text-blue-200 mt-0.5 select-all">Order ID: {razorpaySimData.razorpayOrderId}</p>
+                </div>
               </div>
               <div className="text-right">
                 <span className="text-xs font-semibold text-blue-100 block">Amount Due</span>
