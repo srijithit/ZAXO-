@@ -109,3 +109,11 @@ model AuditLog {
   createdAt   DateTime @default(now())
 }
 
+model OtpVerification {
+  id        String   @id @default(uuid())
+  phone     String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
